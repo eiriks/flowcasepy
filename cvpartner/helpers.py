@@ -49,8 +49,8 @@ def sort_projects_newest_to_oldest(cv) -> list[tuple[datetime.datetime, datetime
     return sorted_projects
 
 
-def get_days_since_last_finished_project(project):
-    date_from, date_to, delta_months, _ = project
+def get_days_since_last_finished_project(project: tuple) -> int:
+    _, date_to, _, _ = project
     if date_to is None:
         # current gig is not ended
         return 0
@@ -74,7 +74,7 @@ def newest_project_is_older_than_n_months(cv, n_months: int = 3):
         return get_days_since_last_finished_project(projects[0]) > days_in_n_months
 
 
-def get_new_certification(cv,
+def get_new_certification(cv: dict,
                           days_to_look_back: int = 365,
                           language: str = 'no') -> list:
     # print(cv.get('navn'))
@@ -103,7 +103,7 @@ def get_new_certification(cv,
     return new_certifications
 
 
-def get_highest_degree(cv) -> Optional[str]:
+def get_highest_degree(cv: dict) -> Optional[str]:
     # degree_mapping = {
     #     'phd': 'phd',
     #     'ph.d.': 'phd',
@@ -193,7 +193,7 @@ def get_age(cv) -> Optional[int]:
         return date.today().year-cv.get('born_year')
 
 
-def add_space_around_slash(string):
+def add_space_around_slash(string: str) -> str:
     return string.replace("/", " / ")
 
 
@@ -245,7 +245,7 @@ def get_role_from_cv_roles(cv_role: dict, lang: str = 'no') -> str | None:
     return tmp_role_string
 
 
-def get_tags_from_cv(cv, lang='no') -> list[str]:
+def get_tags_from_cv(cv: dict, lang: str = 'no') -> list[str]:
     tags = []
     for technology in cv.get('technologies'):
         # these come in groups

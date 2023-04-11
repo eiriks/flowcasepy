@@ -17,6 +17,7 @@ import requests
 
 # consts
 USERS_URL_BASE = "https://{org}.cvpartner.com/api/v1/users?offset={offset}"
+USERS_URL_BASE_SEARCH = "https://{org}.cvpartner.com/api/v2/users/search?deactivated=false&size={size}&office_ids[]={office_id}"
 CV_URL_BASE = "https://{org}.cvpartner.com/api/v3/cvs/{user_id}/{cv_id}"
 
 COUNTRIES = "https://{org}.cvpartner.com/api/v1/countries"
@@ -47,14 +48,16 @@ class CVPartner():
             log.info(f'No office found with name {office_name}!')
             return []
         # do a "search" for users in that office
-        BASE_URL = f"https://{self.org}.cvpartner.com/api/v2/users/search?deactivated=false&size={size}&office_ids[]={office_id[0]}"
-        dept_url = BASE_URL.format(org=self.org, office_id=office_id)
+        dept_url = USERS_URL_BASE_SEARCH.format(
+            org=self.org,
+            size=size,
+            office_id=office_id[0])
         r = requests.get(dept_url, headers=self.auth_header)
         return r.json()
 
     def get_users_and_cvs_from_department(self, office_name: str = 'Data Engineering', size=100) -> list[tuple[dict, dict]]:
-        users = self.get_department_by_name(office_name, size)
-        the_dep = []
+        users: list[dict] = self.get_department_by_name(office_name, size)
+        the_dep: list[tuple[dict, dict]] = []
         for user in users:
             cv = self.get_user_cv(user['user_id'], user['default_cv_id'])
             the_dep.append((user, cv))
@@ -69,7 +72,7 @@ class CVPartner():
             sleep(self.sleep_time)
             users = self._get_users_by_offset(offset)
 
-    def get_user_cv(self, user_id, cv_id):
+    def get_user_cv(self, user_id, cv_id) -> dict:
         log.debug(f'Retreiving user {user_id} CV {cv_id} from API...')
         cv_url = CV_URL_BASE.format(org=self.org, user_id=user_id, cv_id=cv_id)
         r = requests.get(cv_url, headers=self.auth_header)
