@@ -37,36 +37,28 @@ def test_departmen():
 
 
 def test_age():
-    cv = {'born_year': 1984}
-    assert get_age(cv) == 39
-
-
-def test_get_role_from_cv_roles_no_lang():
-    cv_role = {'name': {'no': 'software developer'}}
-    assert get_role_from_cv_roles(cv_role) == 'Software Developer'
+    cv = {'born_year': datetime.now().year - 40}
+    assert get_age(cv) == 40
 
 
 def test_get_role_from_cv_roles_no_lang():
     cv_role = {'name': {'no': 'software developer.'}}
-    assert get_role_from_cv_roles(cv_role) == 'Software Developer'
+    assert get_role_from_cv_roles(cv_role) == 'Software Utvikler'
 
 
 def test_get_role_from_cv_roles_en_lang():
     cv_role = {'name': {'en': 'software developer'}}
-    assert get_role_from_cv_roles(cv_role, lang='en') == 'Software Developer'
+    assert get_role_from_cv_roles(cv_role, lang='en') == 'Software Utvikler'
 
 
 def test_get_role_from_cv_roles_with_dot():
     cv_role = {'name': {'no': 'software developer.'}}
-    assert get_role_from_cv_roles(cv_role) == 'Software Developer'
+    assert get_role_from_cv_roles(cv_role) == 'Software Utvikler'
 
 
 def test_get_role_from_cv_roles_with_slash():
     cv_role = {'name': {'no': 'Tech Lead/Utvikler'}}
     assert get_role_from_cv_roles(cv_role) == 'Tech Lead / Utvikler'
-
-
-''
 
 
 def test_get_role_from_cv_roles_empty_string():

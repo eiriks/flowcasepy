@@ -37,7 +37,7 @@ def create_dates_from_project(project) -> tuple[datetime.datetime, datetime.date
     return date_from, date_to, delta_months
 
 
-def sort_projects_newest_to_oldest(cv) -> list[tuple[datetime.datetime, datetime.datetime | None, int, dict]]:
+def sort_projects_newest_to_oldest(cv: dict) -> list[tuple[datetime.datetime, datetime.datetime | None, int, dict]]:
     projects_to_sort = []
     for project in cv.get('project_experiences'):
         date_from, date_to, delta_monts = create_dates_from_project(project)
@@ -190,7 +190,7 @@ def get_graduation_year(cv) -> Optional[int]:
 
 def get_age(cv) -> Optional[int]:
     if cv.get('born_year'):
-        return date.today().year-cv.get('born_year')
+        return date.today().year - cv.get('born_year')
 
 
 def add_space_around_slash(string: str) -> str:
@@ -223,21 +223,25 @@ def convert_developer_to_utvikler(string: str) -> str:
 
 
 def convert_enginer_to_engineer(string: str) -> str:
-    return re.sub('enginer', 'enginer', string, flags=re.IGNORECASE)
+    return re.sub('enginer', 'engineer', string, flags=re.IGNORECASE)
 
 
 def rename_common_variations_in_dev(string) -> str:
     if string == 'Back End Developer':
         return 'Backend Utvikler'
+    if string == 'Back End Utvikler':
+        return 'Backend Utvikler'
+    return string
 
 
 def get_role_from_cv_roles(cv_role: dict, lang: str = 'no') -> str | None:
     tmp_role_string = cv_role.get('name').get(lang)
     if tmp_role_string:
         tmp_role_string = tmp_role_string.replace("-", " ")
+        tmp_role_string = remove_ending_period(tmp_role_string)
+        tmp_role_string = rename_common_variations_in_dev(tmp_role_string)
         tmp_role_string = convert_enginer_to_engineer(tmp_role_string)
         tmp_role_string = convert_developer_to_utvikler(tmp_role_string)
-        tmp_role_string = remove_ending_period(tmp_role_string)
         tmp_role_string = add_space_around_slash(tmp_role_string)
         tmp_role_string = remove_extra_whitespace(tmp_role_string)
         tmp_role_string = tmp_role_string.title().strip()
@@ -255,3 +259,33 @@ def get_tags_from_cv(cv: dict, lang: str = 'no') -> list[str]:
                     tags.append(group.get('tags').get(lang))
             # print(json.dumps(group.get('tags').get(lang), indent=2))
     return tags
+
+
+def get_users_with_older_unclosed_projects(department: list[tuple[dict, dict]]) -> list[tuple[dict, dict]]:
+    """Get all users with older unclosed projects
+
+    Args:
+        department (list[tuple(dict, dict)]): list of tuples with (cv, user)
+
+    Returns:
+        list[tuple[dict, dict]]: list of tuples with (cv, user)
+    """
+    # print("test")
+    users_with_older_unclosed_projects = []
+    for user, cv in department:
+        # print(cv.keys(), user.keys())
+        sorted_projects = sort_projects_newest_to_oldest(cv)
+        if sorted_projects:
+            unclosed_projects: list = []
+            # skip first project
+            for project in sorted_projects[1:]:
+                date_from, date_to, delta, project_details = project
+                if date_to:
+                    continue
+    #             # if year_to is empty, add prject to list
+                unclosed_projects.append(
+                    (date_from, date_to, delta, project_details))
+        if len(unclosed_projects) > 0:
+            users_with_older_unclosed_projects.append(
+                (user, unclosed_projects))
+    return users_with_older_unclosed_projects

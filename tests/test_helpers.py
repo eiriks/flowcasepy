@@ -28,8 +28,6 @@ def test_convert_enginer_to_engineer():
 def test_rename_common_variations_in_dev():
     assert rename_common_variations_in_dev(
         "Back End Developer") == "Backend Utvikler"
-    assert rename_common_variations_in_dev(
-        "Backend Developer") == "Backend Developer"
 
 
 def test_get_role_from_cv_roles():

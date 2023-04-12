@@ -15,3 +15,5 @@ src.zip
 *.gephi
 exploring.ipynb
 .python-version
+
+/tests/data/*
