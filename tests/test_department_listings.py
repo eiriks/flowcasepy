@@ -10,7 +10,7 @@ department = json.loads(open('tests/data/department.json').read())
 
 @pytest.mark.skip(reason="TDD")
 def test_list_emploees_that_are_about_to_be_promoted():
-    assert False
+    assert 1 == 0
 
 
 # List dept by time since highest edu was ended
