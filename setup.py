@@ -20,7 +20,7 @@ URL = 'https://github.com/peakBreaker/cvpartnerpy'
 EMAIL = 'andershurum@gmail.com'
 AUTHOR = 'Anders L. Hurum'
 REQUIRES_PYTHON = '>=3.5.0'
-DEFAULT_VERSION = '0.0.2'  # Invalid version
+DEFAULT_VERSION = '0.0.3'  # Invalid version
 
 # What packages are required for this module to be executed?
 with open('requirements.txt', 'r') as f:
