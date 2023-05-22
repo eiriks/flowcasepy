@@ -1,59 +1,77 @@
 
-# Pydantic class of employee
 
-from typing import Any, List, Dict, Optional
-from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 from pydantic import BaseModel, Field
 
 
-class URL(BaseModel):
-    url: Optional[str]
+class Thumb(BaseModel):
+    url: Optional[str] = None
+
+
+class FitThumb(BaseModel):
+    url: Optional[str] = None
+
+
+class Large(BaseModel):
+    url: Optional[str] = None
+
+
+class SmallThumb(BaseModel):
+    url: Optional[str] = None
 
 
 class Image(BaseModel):
     url: Optional[str]
-    thumb: URL
-    fit_thumb: URL
-    large: URL
-    small_thumb: URL
+    thumb: Thumb
+    fit_thumb: FitThumb
+    large: Large
+    small_thumb: SmallThumb
+
+
+class Titles(BaseModel):
+    no: Optional[str] = None
+    int: Optional[str] = None
+    se: Optional[str] = None
 
 
 class Employee(BaseModel):
-    '''This class represents an employee in the CVPartner API. '''
+    '''The v4 version of the API'''
+    image: Image
+    title: Optional[str] = None
+    titles: Titles
+    telephone: Optional[str] = None
+    email: Optional[str] = None
+    navn: Optional[str] = None
+    name: Optional[str] = None
+    name_multilang: Dict[str, Any]
+    is_external: bool
+    is_deactivated: bool
+    bruker_id: str
     user_id: str
+    company_id: str
     field_id: str = Field(..., alias="_id")
     id: str
-    company_id: str
-    company_name: str
-    company_subdomains: List[str]
-    company_group_ids: List[str]
-    email: str
-    external_unique_id: Optional[str]
-    upn: Optional[str]
-    deactivated: bool
-    deactivated_at: bool
-    created_at: str
     updated_at: str
-    role: str
-    roles: List[str]
-    role_allowed_office_ids: List
-    role_allowed_tag_ids: List
-    office_id: str
-    office_name: str
-    country_id: str
+    updated_ago: str
+    owner_updated_at: Optional[str] = None
+    default_word_template_id: str
+    default_ppt_template_id: Any
     country_code: str
     language_code: str
     language_codes: List[str]
-    international_toggle: str
-    preferred_download_format: str
-    masterdata_languages: List[str]
-    expand_proposals_toggle: bool
-    selected_office_ids: List
-    include_officeless_reference_projects: bool
-    selected_tag_ids: List
-    override_language_code: Any
-    default_cv_template_id: str
-    image: Image
-    name: str
-    telephone: str
-    default_cv_id: str
+    template_document_type: str
+
+
+class EmployeeMeta(BaseModel):
+    cv: Employee
+    preview_url: str
+    highlight: str
+    index: int
+    id: int
+
+
+class SearchResult(BaseModel):
+    cvs: List[EmployeeMeta]
+    facets: Dict[str, Any]
+    total: int

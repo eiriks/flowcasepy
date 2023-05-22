@@ -1,26 +1,28 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import datetime
+# from devtools import debug
 import re
-from typing import Optional
-from datetime import date
-
 import logging
+import datetime
+from datetime import date
+from typing import Optional
+
+
+from cvpartner.types.cv import ProjectExperience
+from cvpartner.types.cv import CVResponse, Certification
+
 # set up logging to std out
 logger = logging.getLogger(__name__)
 
 
 # grab date parts from project
 # put together a proper python date
-def create_dates_from_project(project) -> tuple[datetime.datetime, datetime.datetime | None, int]:
-    month_from = int(project.get('month_from')
-                     ) if project.get('month_from') else 1
-    month_to = int(project.get('month_to')) if project.get(
-        'month_to') else 1
-    year_from = int(project.get('year_from')) if project.get(
-        'year_from') else 1
-    year_to = int(project.get('year_to')) if project.get('year_to') else 1
+def create_dates_from_project(project: ProjectExperience) -> tuple[datetime.datetime, datetime.datetime | None, int]:
+    month_from = int(project.month_from) if project.month_from else 1
+    month_to = int(project.month_to) if project.month_to else 1
+    year_from = int(project.year_from) if project.year_from else 1
+    year_to = int(project.year_to) if project.year_to else 1
 
     date_from = datetime.datetime(year=year_from, month=month_from, day=1)
     date_to = datetime.datetime(year=year_to, month=month_to, day=1)
@@ -37,15 +39,16 @@ def create_dates_from_project(project) -> tuple[datetime.datetime, datetime.date
     return date_from, date_to, delta_months
 
 
-def sort_projects_newest_to_oldest(cv: dict) -> list[tuple[datetime.datetime, datetime.datetime | None, int, dict]]:
+def sort_projects(cv: CVResponse,
+                  return_newest_first: bool = True) -> list[tuple[datetime.datetime, datetime.datetime | None, int, dict]]:
     projects_to_sort = []
-    for project in cv.get('project_experiences'):
+    for project in cv.project_experiences:
         date_from, date_to, delta_monts = create_dates_from_project(project)
 
         projects_to_sort.append((date_from, date_to, delta_monts, project))
 
     sorted_projects = sorted(
-        projects_to_sort, key=lambda x: x[0], reverse=True)
+        projects_to_sort, key=lambda x: x[0], reverse=return_newest_first)
     return sorted_projects
 
 
@@ -60,7 +63,7 @@ def get_days_since_last_finished_project(project: tuple) -> int:
 
 # Dersom feltet «fra-til» har et «til-dato» > 3mnd gammel
 def newest_project_is_older_than_n_months(cv, n_months: int = 3):
-    projects = sort_projects_newest_to_oldest(cv)
+    projects = sort_projects(cv)
     if not projects:
         # no project experiences found
         return False
@@ -74,27 +77,25 @@ def newest_project_is_older_than_n_months(cv, n_months: int = 3):
         return get_days_since_last_finished_project(projects[0]) > days_in_n_months
 
 
-def get_new_certification(cv: dict,
+def get_new_certification(cv: CVResponse,
                           days_to_look_back: int = 365,
-                          language: str = 'no') -> list:
-    # print(cv.get('navn'))
-    new_certifications: list = []
-    for cert in cv['certifications']:
-        if not cert.get('year'):
+                          language: str = 'no') -> list[Certification]:
+
+    new_certifications: list[Certification] = []
+    for cert in cv.certifications:
+        if not cert.year:
             logger.warning(
-                f"{cv.get('navn')} har en uten årstall: {cert.get('name').get(language)}")
+                f"{cv.navn} har en uten årstall: {getattr(cert.name, language)}")
             continue  # skip certification without a year
 
-        # print(f"{cert.get('name').get(language)}")
-        _month = int(cert.get('month')) if cert.get('month') else 1
+        _month = int(cert.month) if cert.month else 1
         cert_date = datetime.datetime(
-            year=int(cert.get('year')),
+            year=int(cert.year),
             month=_month,
             day=1
         ).astimezone()
         now = datetime.datetime.now().astimezone()
         delta_in_days = (now - cert_date).days
-        # print(f"{cert.get('name').get(language)} for {delta} dager siden")
 
         if delta_in_days < days_to_look_back:
             # print(f'\t --> New last {days_to_look_back} days')
@@ -104,42 +105,8 @@ def get_new_certification(cv: dict,
 
 
 def get_highest_degree(cv: dict) -> Optional[str]:
-    # degree_mapping = {
-    #     'phd': 'phd',
-    #     'ph.d.': 'phd',
-    #     'doktor': 'phd',
-    #     'doctor': 'phd',
-    #     'master': 'master',
-    #     'm.a.': 'master',
-    #     'm.s.': 'master',
-    #     'siviløkonom': 'master',
-    #     'sivilingeniør': 'master',
-    #     'cand scient': 'master',
-    #     'cand.sci.': 'master',
-    #     'cand.mag.': 'master',
-    #     'cand-mag': 'master',
-    #     'm. sc.': 'master',
-    #     'm.sc.': 'master',
-    #     'b.a.': 'bachelor',
-    #     'bs': 'bachelor',
-    #     'ba': 'bachelor',
-    #     'bachelor': 'bachelor',
-    #     'ingeniør': 'bachelor'
-    # }
     canditate_top_degrees = []
 
-    # for edu in cv.get('educations', []):
-    #     year_to = edu.get('year_to')
-    #     if year_to and not year_to.strip().isnumeric():
-    #         continue  # skip unfinnished education
-
-    #     degree = edu.get('degree').get('no')
-    #     if degree:
-    #         degree = degree.lower()
-    #     print("--", degree)
-
-    #     if degree in degree_mapping:
-    #         canditate_top_degrees.append(degree_mapping[degree])
     for edu in cv.get('educations'):
         if not edu.get('year_to') or not edu.get('year_to').strip().isnumeric():
             # skip unfinnished education
@@ -167,9 +134,9 @@ def get_highest_degree(cv: dict) -> Optional[str]:
     if 'bachelor' in canditate_top_degrees:
         return 'bachelor'
 
-
-def get_email(person) -> Optional[str]:
-    return person.get('email')
+# Not used
+# def get_email(person) -> Optional[str]:
+#     return person.get('email')
 
 
 def get_graduation_year(cv) -> Optional[int]:
@@ -259,33 +226,3 @@ def get_tags_from_cv(cv: dict, lang: str = 'no') -> list[str]:
                     tags.append(group.get('tags').get(lang))
             # print(json.dumps(group.get('tags').get(lang), indent=2))
     return tags
-
-
-def get_users_with_older_unclosed_projects(department: list[tuple[dict, dict]]) -> list[tuple[dict, dict]]:
-    """Get all users with older unclosed projects
-
-    Args:
-        department (list[tuple(dict, dict)]): list of tuples with (cv, user)
-
-    Returns:
-        list[tuple[dict, dict]]: list of tuples with (cv, user)
-    """
-    # print("test")
-    users_with_older_unclosed_projects = []
-    for user, cv in department:
-        # print(cv.keys(), user.keys())
-        sorted_projects = sort_projects_newest_to_oldest(cv)
-        if sorted_projects:
-            unclosed_projects: list = []
-            # skip first project
-            for project in sorted_projects[1:]:
-                date_from, date_to, delta, project_details = project
-                if date_to:
-                    continue
-    #             # if year_to is empty, add prject to list
-                unclosed_projects.append(
-                    (date_from, date_to, delta, project_details))
-        if len(unclosed_projects) > 0:
-            users_with_older_unclosed_projects.append(
-                (user, unclosed_projects))
-    return users_with_older_unclosed_projects

@@ -16,4 +16,6 @@ src.zip
 exploring.ipynb
 .python-version
 
+sonar-project.properties
+
 /tests/data/*

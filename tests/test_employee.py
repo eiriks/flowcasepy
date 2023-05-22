@@ -3,14 +3,12 @@ import json
 import pytest
 
 from cvpartner.types.employee import Employee
-
 department = json.loads(open('tests/data/department.json').read())
 
 
 def test_employee():
     employee = Employee(**department[0])
-    # print(employee)
-    employee.company_name
+    print(employee)
     assert type(employee.name) == str
     assert len(employee.name) > 0
 

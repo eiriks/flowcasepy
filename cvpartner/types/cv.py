@@ -29,11 +29,11 @@ class Blog(CVField):
     diverged_from_master: bool
     external_unique_id: Any
     long_description: TranslatedString
-    month: str
+    month: Optional[str] = None
     name: TranslatedString
     origin_id: Any
     url: Optional[str]
-    year: str
+    year: Optional[str] = None
 
 
 class Certification(CVField):
@@ -45,7 +45,7 @@ class Certification(CVField):
     name: TranslatedString
     organiser: TranslatedString
     origin_id: Any
-    year: str
+    year: Optional[str] = None
     year_expire: Any
     attachments: List
 
@@ -127,8 +127,8 @@ class Position(CVField):
     name: TranslatedString
     origin_id: Any
     roles: list[CVField] = []
-    year_from: str
-    year_to: str
+    year_from: Optional[str] = None
+    year_to: Optional[str] = None
     years_of_experience: Optional[int] = None
 
 
@@ -137,9 +137,9 @@ class Presentation(CVField):
     diverged_from_master: bool
     external_unique_id: Any
     long_description: TranslatedString
-    month: str
+    month: Optional[str] = None
     origin_id: Any
-    year: str
+    year: Optional[str] = None
 
 
 class ProjectExperienceSkill(CVField):
@@ -179,7 +179,7 @@ class ProjectExperienceExpanded(ProjectExperience):
     month_to: Optional[str] = None
     origin_id: Any
     percent_allocated: Optional[str]
-    project_experience_skills: List[ProjectExperienceSkill] = []
+    project_experience_skills: Optional[List[ProjectExperienceSkill]] = []
     project_extent_amt: Optional[str]
     project_extent_currency: Optional[str]
     project_extent_hours: Optional[str]
@@ -195,6 +195,7 @@ class ProjectExperienceExpanded(ProjectExperience):
 
 
 class TechnologySkill(CVField):
+    field_id: str = Field(..., alias="_id")
     base_duration_in_years: int
     offset_duration_in_years: int
     proficiency: int
@@ -203,16 +204,18 @@ class TechnologySkill(CVField):
 
 
 class Technology(CVField):
+    field_id: str = Field(..., alias="_id")
     category: TranslatedString
     diverged_from_master: bool
     exclude_tags: Optional[List[Any]]
     external_unique_id: Any
     origin_id: Any
-    technology_skills: List[TechnologySkill] = None
+    technology_skills: Optional[List[TechnologySkill]] = None
     uncategorized: bool
 
 
 class WorkExperience(CVField):
+    field_id: str = Field(..., alias="_id")
     description: TranslatedString
     diverged_from_master: bool
     employer: TranslatedString
@@ -241,7 +244,7 @@ class CVResponse(CVField):
     blogs: List[Blog] = []
     born_day: int
     born_month: int
-    born_year: int
+    born_year: Optional[int] = None  # ??
     bruker_id: str
     certifications: List[Certification] = None
     courses: List[Course]
@@ -264,7 +267,7 @@ class CVResponse(CVField):
     place_of_residence: TranslatedString
     positions: List[Position] = []
     presentations: List[Presentation] = []
-    project_experiences: List[ProjectExperienceExpanded] = None
+    project_experiences: Optional[List[ProjectExperienceExpanded]] = None
     technologies: List[Technology] = None
     telefon: Optional[str] = None
     tilbud_id: Any
@@ -290,9 +293,7 @@ class CVResponse(CVField):
     can_write: bool
 
 
-# class UserListResponse(BaseModel):
-#     __root__: List[CVResponse]
-
+# under are experiment with dataclass
 
 # from dataclasses import dataclass, field
 # from typing import Optional

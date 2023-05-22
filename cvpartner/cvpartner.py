@@ -2,22 +2,27 @@
 # -*- coding: utf-8 -*-
 
 # std lib
-from typing import Tuple
-from typing import List
-# from functools import lru_cache
-# from methodtools import lru_cache
-
-import json
-import os
-from time import sleep
 import logging
+from typing import List
+
+
+from cvpartner.types.cv import CVResponse
+from cvpartner.types.country import Country
+from cvpartner.types.department import Department
+from cvpartner.types.employee import SearchResult, Employee
+
 
 # 3rd party
 import requests
+import pydantic
 
-# consts
+# from cvpartner.types.office import Office
+
+# URLs
 USERS_URL_BASE = "https://{org}.cvpartner.com/api/v1/users?offset={offset}"
 USERS_URL_BASE_SEARCH = "https://{org}.cvpartner.com/api/v2/users/search?deactivated=false&size={size}&office_ids[]={office_id}"
+# USERS_URL_BASE_SEARCH2 = "https://{org}.cvpartner.com/api/v2/users/search?"
+USERS_URL_BASE_SEARCH_V4 = "https://{org}.cvpartner.com/api/v4/search"
 CV_URL_BASE = "https://{org}.cvpartner.com/api/v3/cvs/{user_id}/{cv_id}"
 
 COUNTRIES = "https://{org}.cvpartner.com/api/v1/countries"
@@ -28,74 +33,103 @@ log = logging.getLogger(__name__)
 
 class CVPartner():
 
-    def __init__(self, org, api_key: str, verbose: bool = False, sleep_time: float = 0.2):
+    def __init__(self, org, api_key: str, verbose: bool = False):
         self.auth_header = {"Authorization": f'Token token="{api_key}"'}
         self.org = org
         self.verbose = verbose
-        self.sleep_time = sleep_time
 
-    def _get_users_by_offset(self, offset):
-        log.debug(f'{offset} - Retreiving data from API...')
-        users_url = USERS_URL_BASE.format(org=self.org, offset=offset)
-        r = requests.get(users_url, headers=self.auth_header)
-        return r.json()
-
-    def get_department_by_name(self, office_name: str = 'Data Engineering', size=100):
+    def get_emploees_by_department(self, office_name: str = 'Data Engineering', size=100) -> None | List[Employee]:
         # find office ID from name
         offices = self.list_offices()
-        office_id = [o[0] for o in offices if o[1] == office_name]
+        # filter down to only the match, if any
+        office_id = [o[1] for o in offices if o[0] == office_name]
         if not office_id:
-            log.info(f'No office found with name {office_name}!')
+            log.warning(f'No office found with name {office_name}!')
             return []
         # do a "search" for users in that office
-        dept_url = USERS_URL_BASE_SEARCH.format(
-            org=self.org,
-            size=size,
-            office_id=office_id[0])
-        r = requests.get(dept_url, headers=self.auth_header)
-        return r.json()
+        url = USERS_URL_BASE_SEARCH_V4.format(org=self.org)
 
-    def get_users_and_cvs_from_department(self, office_name: str = 'Data Engineering', size=100) -> list[tuple[dict, dict]]:
-        users: list[dict] = self.get_department_by_name(office_name, size)
-        the_dep: list[tuple[dict, dict]] = []
+        params = {
+            "office_ids": office_id,
+            "offset": 0,
+            "size": size,
+            "deactivated": False,
+        }
+        r = requests.post(url, json=params, headers=self.auth_header)
+
+        try:
+            user_data = r.json()
+        except requests.exceptions.JSONDecodeError:
+            print("Couldn't decode response from CVPartner:\n" + r.text)
+            raise
+
+        try:
+            search_result: SearchResult = pydantic.parse_obj_as(
+                SearchResult, user_data)
+            # return list of Employee objects
+            return [emp_meta.cv for emp_meta in search_result.cvs]
+
+        except pydantic.ValidationError:
+            print("Couldn't parse response from CVPartner:\n" + r.text)
+            raise
+
+    def get_emploees_and_cvs_from_department(self, office_name: str = 'Data Engineering', size=100) -> Department | None:
+        # this fails by returning 100, it should be limited to size of department...
+        # TODO: fix this
+        users: list[Employee] = self.get_emploees_by_department(
+            office_name, size)
+
+        the_dep: Department = []
+
         for user in users:
-            cv = self.get_user_cv(user['user_id'], user['default_cv_id'])
+            cv = self.get_user_cv(user.user_id, user.id)
             the_dep.append((user, cv))
-        return the_dep
 
-    def get_users_from_api(self):
-        offset = 0
-        users = self._get_users_by_offset(offset)
-        while len(users) > 0:
-            offset += len(users)
-            yield from users
-            sleep(self.sleep_time)
-            users = self._get_users_by_offset(offset)
+        try:
+            return pydantic.parse_obj_as(Department, the_dep)
+        except pydantic.ValidationError:
+            print("Couldn't parse response from CVPartner:\n" + office_name)
+            raise
 
-    def get_user_cv(self, user_id, cv_id) -> dict:
+    def get_user_cv(self, user_id, cv_id) -> CVResponse:
         log.debug(f'Retreiving user {user_id} CV {cv_id} from API...')
-        cv_url = CV_URL_BASE.format(org=self.org, user_id=user_id, cv_id=cv_id)
+        cv_url = CV_URL_BASE.format(
+            org=self.org, user_id=user_id, cv_id=cv_id)
         r = requests.get(cv_url, headers=self.auth_header)
-        return r.json()
+        try:
+            cv_data = r.json()
+        except requests.exceptions.JSONDecodeError:
+            print("Couldn't decode response from CVPartner:\n" + r.text)
+            raise
 
-    def list_countries(self):
+        try:
+            cv = CVResponse(**cv_data)
+        except pydantic.errors.JsonError as e:
+            print("Couldn't parse response from CVPartner:\n" + str(e))
+            raise
+
+        return cv
+
+    def list_countries(self) -> List[Country]:
         url = COUNTRIES.format(org=self.org)
         r = requests.get(url, headers=self.auth_header)
-        return r.json()
+        try:
+            data = r.json()
+        except requests.exceptions.JSONDecodeError:
+            print("Couldn't decode response from CVPartner:\n" + r.text)
+            raise
 
-    def list_offices(self, country: str = 'no') -> List[Tuple[str, str]]:
-        """return id and name of offices, aka departments"""
-        countries = self.list_countries()
-        offices = [n for n in countries if n.get(
-            'code') == country][0].get('offices')
-        return [(o.get('_id'), o.get('name')) for o in offices]
+        try:
+            return pydantic.parse_obj_as(List[Country], data)
+        except pydantic.ValidationError:
+            print("Couldn't parse response from CVPartner:\n" + r.text)
+            raise
 
-    def get_department(self, office_name: str = 'Data Engineering') -> List[Tuple[dict, dict]]:
-        '''Returns a tuple with (user, cv) in a list'''
-        the_dep = []
-        all_users = self.get_users_from_api()
-        for user in all_users:
-            if user['office_name'] == office_name:
-                cv = self.get_user_cv(user['user_id'], user['default_cv_id'])
-                the_dep.append((user, cv))
-        return the_dep
+    # should return list[Office] ?``
+    def list_offices(self, country_code: str = 'no') -> list[tuple[str, str]]:
+        """return name and Id of offices, aka departments"""
+        countries: List[Country] = self.list_countries()
+        # filter out offices from country
+        offices = [c.offices for c in countries if c.code == country_code][0]
+        # only return id and name
+        return [(o.name, o.office_id) for o in offices]
