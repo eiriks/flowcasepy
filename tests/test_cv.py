@@ -20,16 +20,13 @@ department_with_cv = json.loads(
 
 
 def test_mapping_department():
-    # department_with_cv = Department(**department_with_cv)
     department_with_cv_object = parse_obj_as(Department, department_with_cv)
     assert type(department_with_cv_object) == Department
 
 
 def test_single_cv():
     _cv = department_with_cv[0][1]
-    # print()
     cv = CVResponse(**_cv)
-    # print(cv)
 
     assert type(cv.name) == str
     assert len(cv.name) > 0
@@ -73,10 +70,9 @@ def cv_partner():
 def test_get_employees_by_department(cv_partner):
     employees = cv_partner.get_emploees_by_department()
     assert isinstance(employees, list)
-    # assert len(employees) == 100
 
 
-@pytest.mark.skip(reason="takes 20s")
+# @pytest.mark.skip(reason="takes 20s")
 def test_get_employees_and_cvs_from_department(cv_partner):
     department = cv_partner.get_emploees_and_cvs_from_department()
     assert isinstance(department, Department)

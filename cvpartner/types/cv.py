@@ -246,17 +246,17 @@ class CVResponse(CVField):
     born_month: int
     born_year: Optional[int] = None  # ??
     bruker_id: str
-    certifications: List[Certification] = None
+    certifications: Optional[List[Certification]] = None
     courses: List[Course]
     custom_tag_ids: List
     cv_roles: List[CvRole]
     default: bool
-    educations: List[Education] = None
+    educations: Optional[List[Education]] = None
     honors_awards: List[HonorsAward] = []
     imported_date: Any
-    key_qualifications: List[KeyQualification] = None
+    key_qualifications: Optional[List[KeyQualification]] = None
     landline: Any
-    languages: List[Language] = None
+    languages: Optional[List[Language]] = None
     level: Any
     locked_at: Any
     locked_until: Any
@@ -268,12 +268,12 @@ class CVResponse(CVField):
     positions: List[Position] = []
     presentations: List[Presentation] = []
     project_experiences: Optional[List[ProjectExperienceExpanded]] = None
-    technologies: List[Technology] = None
+    technologies: Optional[list[Technology]] = None
     telefon: Optional[str] = None
     tilbud_id: Any
     title: TranslatedString
     twitter: Optional[str] = None
-    work_experiences: List[WorkExperience] = None
+    work_experiences: Optional[list[WorkExperience]] = None
     name: str
     user_id: str
     company_id: str
@@ -291,75 +291,3 @@ class CVResponse(CVField):
     highlighted_roles: List
     image: Image
     can_write: bool
-
-
-# under are experiment with dataclass
-
-# from dataclasses import dataclass, field
-# from typing import Optional
-
-
-# @dataclass
-# class Cv:
-#     _id: str
-#     born_month: int
-#     born_year: int
-#     bruker_id: str
-#     certifications: list
-#     courses: list
-#     created_at: str
-#     custom_tag_ids: list
-#     cv_roles: list
-#     default: bool
-#     educations: list
-#     imported_date: str
-#     key_qualifications: list
-#     landline: str
-#     languages: list
-#     level: str
-#     locked_at: str
-#     locked_until: str
-#     modifier_id: str
-#     name_multilang: dict
-#     nationality: dict
-#     navn: str
-#     order: str
-#     owner_updated_at: str
-#     owner_updated_at_significant: str
-#     place_of_residence: dict
-#     positions: list
-#     project_experiences: list
-#     technologies: list
-#     updated_at: str
-#     version: int
-#     work_experiences: list
-#     name: str
-#     user_id: str
-#     company_id: str
-#     external_unique_id: str
-#     email: str
-#     country_code: str
-#     language_code: str
-#     language_codes: list
-#     proposal: str
-#     custom_tags: list
-#     updated_ago: str
-#     template_document_type: str
-#     default_word_template_id: str
-#     default_ppt_template_id: str
-#     highlighted_roles: list
-#     image: dict
-#     can_write: bool
-#     positions: list = field(default_factory=list)
-#     blogs: list = field(default_factory=list)
-#     honors_awards: list = field(default_factory=list)
-#     presentations: list = field(default_factory=list)
-#     project_experiences: list = field(default_factory=list)
-#     technologies: list = field(default_factory=list)
-#     twitter: Optional[str]
-#     title: Optional[dict]
-#     tilbud_id: Optional[str]
-#     born_day: Optional[int]
-#     telefon: Optional[str]
-#     locked_at: Optional[bool]
-#     locked_until: Optional[str]

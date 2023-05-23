@@ -26,9 +26,6 @@ DEFAULT_VERSION = '0.0.3'  # Invalid version
 with open('requirements.txt', 'r') as f:
     REQUIRED = f.read().split('\n')
 
-# REQUIRED = [
-    # 'requests'
-# ]
 
 # What packages are optional?
 EXTRAS = {
@@ -64,10 +61,10 @@ class CleanCommand(Command):
     user_options = []
 
     def initialize_options(self):
-        pass
+        pass  # dunno what this does
 
     def finalize_options(self):
-        pass
+        pass  # dunno what this does
 
     def run(self):
         try:
@@ -90,10 +87,10 @@ class PublishCommand(Command):
         print('PUBLISH:STATUS: {0}'.format(s))
 
     def initialize_options(self):
-        pass
+        pass  # dunno what this does
 
     def finalize_options(self):
-        pass
+        pass  # dunno what this does
 
     def run(self):
 
@@ -124,9 +121,7 @@ setup(
     # If your package is a single module, use this instead of 'packages':
     # py_modules=['mypackage'],
 
-    # entry_points={
-    #     'console_scripts': ['mycli=mymodule:cli'],
-    # },
+
     install_requires=REQUIRED,
     extras_require=EXTRAS,
     include_package_data=True,
@@ -139,7 +134,9 @@ setup(
         'Programming Language :: Python :: 3.11',
     ],
     entry_points={
+        #     'console_scripts': ['mycli=mymodule:cli'],
     },
+
     # scripts=['bin/funny-joke.sh'],
     # $ setup.py publish support.
     cmdclass={

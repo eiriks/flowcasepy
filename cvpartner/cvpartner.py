@@ -16,12 +16,10 @@ from cvpartner.types.employee import SearchResult, Employee
 import requests
 import pydantic
 
-# from cvpartner.types.office import Office
 
 # URLs
 USERS_URL_BASE = "https://{org}.cvpartner.com/api/v1/users?offset={offset}"
 USERS_URL_BASE_SEARCH = "https://{org}.cvpartner.com/api/v2/users/search?deactivated=false&size={size}&office_ids[]={office_id}"
-# USERS_URL_BASE_SEARCH2 = "https://{org}.cvpartner.com/api/v2/users/search?"
 USERS_URL_BASE_SEARCH_V4 = "https://{org}.cvpartner.com/api/v4/search"
 CV_URL_BASE = "https://{org}.cvpartner.com/api/v3/cvs/{user_id}/{cv_id}"
 
@@ -79,7 +77,7 @@ class CVPartner():
         users: list[Employee] = self.get_emploees_by_department(
             office_name, size)
 
-        the_dep: Department = []
+        the_dep = []
 
         for user in users:
             cv = self.get_user_cv(user.user_id, user.id)

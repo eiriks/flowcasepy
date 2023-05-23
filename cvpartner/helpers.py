@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# from devtools import debug
 import re
 import logging
 import datetime

@@ -17,5 +17,6 @@ exploring.ipynb
 .python-version
 
 sonar-project.properties
+.scannerwork/
 
 /tests/data/*

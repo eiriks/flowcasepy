@@ -21,7 +21,6 @@ def test_departmen():
     department = cvp.get_department()
     t1 = datetime.now()-t0
     print(f't1: {t1}')
-    department2 = cvp.get_department()
     t2 = datetime.now()-t0
     print(f't2: {t2}')
     print(len(department))
@@ -41,19 +40,22 @@ def test_age():
     assert get_age(cv) == 40
 
 
+SOFTWARE_UTVIKLER = 'Software Utvikler'
+
+
 def test_get_role_from_cv_roles_no_lang():
     cv_role = {'name': {'no': 'software developer.'}}
-    assert get_role_from_cv_roles(cv_role) == 'Software Utvikler'
+    assert get_role_from_cv_roles(cv_role) == SOFTWARE_UTVIKLER
 
 
 def test_get_role_from_cv_roles_en_lang():
     cv_role = {'name': {'en': 'software developer'}}
-    assert get_role_from_cv_roles(cv_role, lang='en') == 'Software Utvikler'
+    assert get_role_from_cv_roles(cv_role, lang='en') == SOFTWARE_UTVIKLER
 
 
 def test_get_role_from_cv_roles_with_dot():
     cv_role = {'name': {'no': 'software developer.'}}
-    assert get_role_from_cv_roles(cv_role) == 'Software Utvikler'
+    assert get_role_from_cv_roles(cv_role) == SOFTWARE_UTVIKLER
 
 
 def test_get_role_from_cv_roles_with_slash():

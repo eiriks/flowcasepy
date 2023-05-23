@@ -47,15 +47,14 @@ def get_all_people_graph(noa_departments, add_roles=True, add_tags=True) -> nx.G
                                 (get_role_from_cv_roles(role), {'type': 'role'}))
                             edges.append(
                                 (user_name, get_role_from_cv_roles(role)))
-                if add_tags:
-                    if get_tags_from_cv(cv):
-                        # skills are nodes too
-                        nodes.extend([(cv_tag, {'type': 'skill'})
-                                      for cv_tag in get_tags_from_cv(cv)])
+                if add_tags and get_tags_from_cv(cv):
+                    # skills are nodes too
+                    nodes.extend([(cv_tag, {'type': 'skill'})
+                                  for cv_tag in get_tags_from_cv(cv)])
 
-                        # and user-> skill are egdes
-                        edges.extend([(user_name, t)
-                                     for t in get_tags_from_cv(cv)])
+                    # and user-> skill are egdes
+                    edges.extend([(user_name, t)
+                                  for t in get_tags_from_cv(cv)])
 
     G.add_nodes_from(nodes)
     G.add_edges_from(edges)
@@ -85,7 +84,7 @@ def get_roles_and_people_graph(department) -> nx.Graph:
 
     G.add_nodes_from(nodes)
     G.add_edges_from(edges)
-    # print(G)
+
     # nx.draw(G)
     return G
 
@@ -117,6 +116,5 @@ def get_skills_and_people_graph(department) -> nx.Graph:
 
     G.add_nodes_from(nodes)
     G.add_edges_from(edges)
-    # print(G)
     # nx.draw(G)
     return G

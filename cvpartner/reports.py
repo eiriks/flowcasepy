@@ -19,9 +19,6 @@ def print_users_with_older_unclosed_projects(
     Returns:
         list[tuple[Employee, dict]]: list of tuples with (Employee, cv)
     """
-    # print("test")
-    # from devtools import debug
-    # debug(department)
 
     users_with_older_unclosed_projects = []
     for user, cv in department.__root__:
