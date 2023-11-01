@@ -20,3 +20,4 @@ sonar-project.properties
 .scannerwork/
 
 /tests/data/*
+example_cv.json
