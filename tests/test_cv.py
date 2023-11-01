@@ -72,7 +72,7 @@ def test_get_employees_by_department(cv_partner):
     assert isinstance(employees, list)
 
 
-# @pytest.mark.skip(reason="takes 20s")
+@pytest.mark.skip(reason="takes 20s")
 def test_get_employees_and_cvs_from_department(cv_partner):
     department = cv_partner.get_emploees_and_cvs_from_department()
     assert isinstance(department, Department)

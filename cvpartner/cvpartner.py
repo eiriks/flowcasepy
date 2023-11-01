@@ -89,7 +89,7 @@ class CVPartner():
             print("Couldn't parse response from CVPartner:\n" + office_name)
             raise
 
-    def get_user_cv(self, user_id, cv_id) -> CVResponse:
+    def get_user_cv(self, user_id: str, cv_id: str) -> CVResponse:
         log.debug(f'Retreiving user {user_id} CV {cv_id} from API...')
         cv_url = CV_URL_BASE.format(
             org=self.org, user_id=user_id, cv_id=cv_id)

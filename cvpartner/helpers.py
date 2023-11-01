@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from cvpartner.types.cv import Education, ProjectExperienceExpanded, WorkExperience
 import re
 import logging
 import datetime
@@ -10,6 +11,7 @@ from typing import Optional
 
 from cvpartner.types.cv import ProjectExperience
 from cvpartner.types.cv import CVResponse, Certification
+from cvpartner.types.employee import Employee
 
 # set up logging to std out
 logger = logging.getLogger(__name__)
@@ -67,7 +69,7 @@ def newest_project_is_older_than_n_months(cv, n_months: int = 3):
         # no project experiences found
         return False
 
-    date_from, date_to, delta_months, _ = projects[0]
+    _, date_to, _, _ = projects[0]
     if date_to is None:
         # current gig is not ended
         return False
@@ -103,15 +105,83 @@ def get_new_certification(cv: CVResponse,
     return new_certifications
 
 
+def get_new_work_experiences(cv: CVResponse,
+                             days_to_look_back: int = 365,
+                             language: str = 'no') -> list[WorkExperience]:
+    """Not very relevant as work experience is emplyers.
+    We mostly care about work done in current posistion.
+    """
+    new_work_experiences: list[WorkExperience] = []
+    for job in cv.work_experiences:
+        if not job.year_from:
+            logger.warning(
+                f"{cv.navn} har en jobb uten start-årstall: {getattr(job.employer, language)}")
+            continue  # skip work without a start year
+
+        _month = int(job.month_from) if job.month_from else 1
+        cert_date = datetime.datetime(
+            year=int(job.year_from),
+            month=_month,
+            day=1
+        ).astimezone()
+        now = datetime.datetime.now().astimezone()
+        delta_in_days = (now - cert_date).days
+
+        if delta_in_days < days_to_look_back:
+            new_work_experiences.append(job)
+
+    return new_work_experiences
+
+
+def get_new_project_experiences(cv: CVResponse, days_to_look_back: int = 365, language: str = 'no') -> list[ProjectExperienceExpanded]:
+    new_project_experiences: list[ProjectExperienceExpanded] = []
+    for project in cv.project_experiences:
+        if not project.year_from:
+            logger.warning(
+                f"{cv.navn} har en prosjekt uten start-årstall: {getattr(project.customer, language)}")
+            continue
+
+        _month = int(project.month_from) if project.month_from else 1
+        cert_date = datetime.datetime(
+            year=int(project.year_from),
+            month=_month,
+            day=1
+        ).astimezone()
+        now = datetime.datetime.now().astimezone()
+        delta_in_days = (now - cert_date).days
+
+        if delta_in_days < days_to_look_back:
+            new_project_experiences.append(project)
+
+    return new_project_experiences
+
+
+def get_new_educations(cv, days_to_look_back=365, language: str = 'no'):
+    new_educations: list[Education] = []
+    for education in cv.educations:
+        if education.year_to is None:
+            # un-finnished edu bussiness?
+            continue  # skip
+
+        # edu has just year, not month or day
+        # year_from='1994',
+        # year_to='1998',
+
+        if education.year_to > datetime.datetime.now() - datetime.timedelta(days=days_to_look_back):
+            new_educations.append(education)
+    return new_educations
+
+
 def get_highest_degree(cv: dict) -> Optional[str]:
     canditate_top_degrees = []
 
-    for edu in cv.get('educations'):
-        if not edu.get('year_to') or not edu.get('year_to').strip().isnumeric():
+    for edu in cv.educations:
+        if not edu.year_to or not edu.year_to.strip().isnumeric():
             # skip unfinnished education
             continue
 
-        degree = edu.get('degree').get('no')
+        degree = edu.degree.no
+        # print(degree)
         if degree:
             degree = degree.lower()
             if any(deg in degree for deg in ['phd', 'ph.d.', 'doktor', 'doctor']):
@@ -122,8 +192,10 @@ def get_highest_degree(cv: dict) -> Optional[str]:
                     'm. sc', 'm.sc.']):
                 canditate_top_degrees.append('master')
             if any(deg in degree for deg in ['b.a.', 'bs', 'ba', 'bachelor',
-                                             'b.sc.', 'b.sc', 'ingeniør']):
+                                             'b.sc.', 'b.sc', 'ingeniør', '3 year it education']):
                 canditate_top_degrees.append('bachelor')
+        # 'Høyskolekandidat i programmering'
+        # that is two years. not a BA/BS
 
     # resolve
     if 'phd' in canditate_top_degrees:
@@ -132,10 +204,17 @@ def get_highest_degree(cv: dict) -> Optional[str]:
         return 'master'
     if 'bachelor' in canditate_top_degrees:
         return 'bachelor'
+    # fallback for no hits
+    return 'unknown'
 
-# Not used
-# def get_email(person) -> Optional[str]:
-#     return person.get('email')
+# Not used (used in Lønn)
+
+
+def get_email(person: Employee, convert_to_lowercase: bool = True) -> Optional[str]:
+    if convert_to_lowercase:
+        return person.email.lower()
+    else:
+        return person.email
 
 
 def get_graduation_year(cv) -> Optional[int]:
@@ -147,16 +226,17 @@ def get_graduation_year(cv) -> Optional[int]:
     Returns:
         Optional[int]: the year as int (eg 2008) or None
     """
-    if cv.get('educations'):
-        graduation_years = [int(n.get('year_to'))
-                            for n in cv.get('educations') if n.get('year_to').isnumeric()]
+    if cv.educations:
+        # print(cv.educations)
+        graduation_years = [int(n.year_to)
+                            for n in cv.educations if n is not None and str(n.year_to).isnumeric()]
         if len(graduation_years) > 0:
             return int(max(graduation_years))
 
 
-def get_age(cv) -> Optional[int]:
-    if cv.get('born_year'):
-        return date.today().year - cv.get('born_year')
+def get_age(cv: CVResponse) -> Optional[int]:
+    if cv.born_year:
+        return date.today().year - cv.born_year
 
 
 def add_space_around_slash(string: str) -> str:

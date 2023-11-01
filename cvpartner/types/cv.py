@@ -242,15 +242,15 @@ class Image(BaseModel):
 
 class CVResponse(CVField):
     blogs: List[Blog] = []
-    born_day: int
-    born_month: int
+    born_day: Optional[int]
+    born_month: Optional[int]
     born_year: Optional[int] = None  # ??
     bruker_id: str
     certifications: Optional[List[Certification]] = None
-    courses: List[Course]
-    custom_tag_ids: List
-    cv_roles: List[CvRole]
-    default: bool
+    courses: Optional[List[Course]]
+    custom_tag_ids: Optional[List]
+    cv_roles: Optional[List[CvRole]]
+    default: Optional[bool]
     educations: Optional[List[Education]] = None
     honors_awards: List[HonorsAward] = []
     imported_date: Any
@@ -260,11 +260,11 @@ class CVResponse(CVField):
     level: Any
     locked_at: Any
     locked_until: Any
-    name_multilang: Dict[str, Any]
-    nationality: TranslatedString
+    name_multilang: Optional[Dict[str, Any]]
+    nationality: Optional[TranslatedString]
     navn: str
     owner_updated_at_significant: Optional[str] = None
-    place_of_residence: TranslatedString
+    place_of_residence: Optional[TranslatedString]
     positions: List[Position] = []
     presentations: List[Presentation] = []
     project_experiences: Optional[List[ProjectExperienceExpanded]] = None
@@ -274,20 +274,20 @@ class CVResponse(CVField):
     title: TranslatedString
     twitter: Optional[str] = None
     work_experiences: Optional[list[WorkExperience]] = None
-    name: str
-    user_id: str
-    company_id: str
+    name: Optional[str]
+    user_id: Optional[str]
+    company_id: Optional[str]
     external_unique_id: Any
-    email: str
-    country_code: str
-    language_code: str
-    language_codes: List[str]
+    email: Optional[str]
+    country_code: Optional[str]
+    language_code: Optional[str]
+    language_codes: Optional[List[str]]
     proposal: Any
-    custom_tags: List
-    updated_ago: str
-    template_document_type: str
-    default_word_template_id: str
+    custom_tags: Optional[List]
+    updated_ago: Optional[str]
+    template_document_type: Optional[str]
+    default_word_template_id: Optional[str]
     default_ppt_template_id: Any
-    highlighted_roles: List
-    image: Image
-    can_write: bool
+    highlighted_roles: Optional[List]
+    image: Optional[Image]
+    can_write: Optional[bool]

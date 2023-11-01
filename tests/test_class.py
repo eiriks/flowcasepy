@@ -6,6 +6,7 @@ import pytest
 
 from cvpartner import CVPartner
 from cvpartner.helpers import get_role_from_cv_roles
+from cvpartner.types.cv import CVResponse
 
 
 def test_class_instanciation():
@@ -36,7 +37,16 @@ def test_departmen():
 
 
 def test_age():
-    cv = {'born_year': datetime.now().year - 40}
+
+    cv = CVResponse(
+        born_year=datetime.now().year - 40,
+        _id='123',
+        bruker_id='123',
+        cv_roles=[],
+        navn='Testing',
+        title={'no': 'Konge'}
+    )
+
     assert get_age(cv) == 40
 
 
