@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from cvpartner.types.cv import Education, ProjectExperienceExpanded, WorkExperience
+from cvpartner.types.cv import Course, Education, HonorsAward, Presentation, ProjectExperienceExpanded, WorkExperience
 import re
 import logging
 import datetime
@@ -78,6 +78,33 @@ def newest_project_is_older_than_n_months(cv, n_months: int = 3):
         return get_days_since_last_finished_project(projects[0]) > days_in_n_months
 
 
+def get_new_courses(cv: CVResponse,
+                    days_to_look_back: int = 365,
+                    language: str = 'no') -> list[Course]:
+    new_courses: list[Course] = []
+    for course in cv.courses:
+        if not course.year:
+            logger.warning(
+                f"{cv.navn} har en uten årstall: {getattr(course.name, language)}")
+            continue  # skip course without a year
+
+        _month = int(course.month) if course.month else 1
+        course_date = datetime.datetime(
+            year=int(course.year),
+            month=_month,
+            day=1  # there is no day in course
+        ).astimezone()
+        now = datetime.datetime.now().astimezone()
+        # TypeError: can't subtract offset-naive and offset-aware datetimes
+
+        delta_in_days = (now - course_date).days
+
+        if delta_in_days < days_to_look_back:
+            new_courses.append(course)
+
+    return new_courses
+
+
 def get_new_certification(cv: CVResponse,
                           days_to_look_back: int = 365,
                           language: str = 'no') -> list[Certification]:
@@ -103,6 +130,58 @@ def get_new_certification(cv: CVResponse,
             new_certifications.append(cert)
 
     return new_certifications
+
+
+def get_new_honors_and_awards(cv: CVResponse,
+                              days_to_look_back: int = 365,
+                              language: str = 'no') -> list[HonorsAward]:
+    new_honors_and_awards: list[HonorsAward] = []
+    for honor in cv.honors_awards:
+        if not honor.year:
+            logger.warning(
+                f"{cv.navn} har en uten årstall: {getattr(honor.name, language)}")
+            continue  # skip honor without a year
+
+        _month = int(honor.month) if honor.month else 1
+        honor_date = datetime.datetime(
+            year=int(honor.year),
+            month=_month,
+            day=1
+        ).astimezone()
+        now = datetime.datetime.now().astimezone()
+        delta_in_days = (now - honor_date).days
+
+        if delta_in_days < days_to_look_back:
+            new_honors_and_awards.append(honor)
+
+    return new_honors_and_awards
+
+
+def get_new_presentations(cv: CVResponse,
+                          days_to_look_back: int = 365,
+                          language: str = 'no') -> list[Presentation]:
+
+    new_presentations: list[Presentation] = []
+    for presentation in cv.presentations:
+        if not presentation.year:
+            logger.warning(
+                f"{cv.navn} har en uten årstall: {getattr(presentation.description, language)}")
+            continue  # skip presentation without a year
+
+        _month = int(presentation.month) if presentation.month else 1
+        presentation_date = datetime.datetime(
+            year=int(presentation.year),
+            month=_month,
+            day=1
+        ).astimezone()  # there is no day in presentation
+
+        now = datetime.datetime.now().astimezone()
+        delta_in_days = (now - presentation_date).days
+
+        if delta_in_days < days_to_look_back:
+            new_presentations.append(presentation)
+
+    return new_presentations
 
 
 def get_new_work_experiences(cv: CVResponse,

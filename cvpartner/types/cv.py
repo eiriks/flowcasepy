@@ -97,10 +97,10 @@ class HonorsAward(CVField):
     for_work: TranslatedString
     issuer: TranslatedString
     long_description: TranslatedString
-    month: str
+    month: Optional[str] = None
     name: TranslatedString
     origin_id: Any
-    year: str
+    year: Optional[str] = None
 
 
 class KeyQualification(CVField):
@@ -252,7 +252,7 @@ class CVResponse(CVField):
     cv_roles: Optional[List[CvRole]]
     default: Optional[bool]
     educations: Optional[List[Education]] = None
-    honors_awards: List[HonorsAward] = []
+    honors_awards: Optional[List[HonorsAward]] = []
     imported_date: Any
     key_qualifications: Optional[List[KeyQualification]] = None
     landline: Any

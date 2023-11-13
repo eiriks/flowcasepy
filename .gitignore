@@ -20,4 +20,5 @@ sonar-project.properties
 .scannerwork/
 
 /tests/data/*
+/tests/*.ipynb
 example_cv.json
