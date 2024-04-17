@@ -1,14 +1,17 @@
 # file with functions to generate reports
-from cvpartner.types.cv import CVResponse, Course, HonorsAward
-from cvpartner.types.department import Department
-from cvpartner.helpers import get_new_courses, get_new_honors_and_awards, get_new_presentations, sort_projects, get_new_certification
+import datetime
 import logging
+from typing import Dict, List
 
 from cvpartner.types.employee import Employee
+from cvpartner.types.department import Department
+from cvpartner.types.cv import CVResponse, Certification, Course, HonorsAward, Presentation, ProjectExperienceExpanded, ProjectExperienceSkill
+from cvpartner.helpers import get_new_courses, get_new_honors_and_awards, get_new_presentations, get_new_projects, sort_projects, get_new_certification
+
 logger = logging.getLogger(__name__)
 
 
-def print_users_with_older_unclosed_projects(
+def print_people_with_older_unclosed_projects(
     department: Department
 ) -> list[tuple[Employee, dict]]:
     """Get all users with older unclosed projects
@@ -53,8 +56,6 @@ def print_users_with_older_unclosed_projects(
         # print(len(projects))
         print()
 
-
-#
 def print_people_with_new_certifications(department: Department,
                                          days_to_look_back=365) -> None:
     print("new!")
@@ -68,10 +69,31 @@ def print_people_with_new_certifications(department: Department,
             print(f"\t- {cert.name.no}")
 
 
+def get_people_with_new_projects(department: Department,
+                                 days_to_look_back: int = 365,
+                                 verbose: bool = False) -> dict[str, list[ProjectExperienceExpanded]]:
+    if verbose:
+        print("Looking for new projects...")
+
+    new_project_experiences = {}
+
+    for _, cv in department.root:
+        cv: CVResponse
+        new_projects = get_new_projects(cv,
+                                        days_to_look_back=days_to_look_back)
+        if new_projects:
+            new_project_experiences[cv.navn] = new_projects
+
+    if verbose:
+        print(f'{len(new_project_experiences)} people with new projects found')
+
+    return new_project_experiences
+
+
 def get_people_with_new_courses(department: Department, days_to_look_back=365) -> dict[str, list[Course]]:
     print("Looking for new courses...")
     new_courses = {}
-    for _, cv in department.__root__[:]:
+    for _, cv in department.root:
         cv: CVResponse
         new_certs = get_new_courses(cv,
                                     days_to_look_back=days_to_look_back,
@@ -95,11 +117,12 @@ def print_people_with_new_courses(department: Department,
 
 
 def get_people_with_new_certifications(department: Department,
-                                       days_to_look_back=365):
+                                       days_to_look_back=365) -> dict[str, list[Certification]]:
     # print("Looking for new certifications...")
 
     new_certifications = {}
-    for _, cv in department.__root__[:]:
+
+    for _, cv in department.root[:]:
         cv: CVResponse
         new_certs = get_new_certification(cv,
                                           days_to_look_back=days_to_look_back)
@@ -116,7 +139,7 @@ def print_people_who_might_have_forgotten_to_put_current_work_on_cv(
 ) -> None:
     from cvpartner.helpers import newest_project_is_older_than_n_months
     print("Looking for people who might have forgotten to put current work on CV...")
-    for persone, cv in department.__root__[:]:
+    for persone, cv in department.root[:]:
         if newest_project_is_older_than_n_months(cv, months_to_look_back):
             print(cv.navn)
 
@@ -125,10 +148,10 @@ def print_people_who_might_have_forgotten_to_put_current_work_on_cv(
 
 
 def get_people_with_new_presentations(department: Department,
-                                      days_to_look_back=365):
+                                      days_to_look_back=365) -> Dict[str, List[Presentation]]:
     print("Looking for new presentations...")
     new_presentations = {}
-    for _, cv in department.__root__[:]:
+    for _, cv in department.root[:]:
         cv: CVResponse
         presentations = get_new_presentations(cv,
                                               days_to_look_back)
@@ -152,13 +175,12 @@ def print_people_with_new_presentations(department: Department,
                 print(f"\t- {presentation.description.no}")
 
 
-# get_people_with_new_honors_and_awards, print_people_with_new_honors_and_awards
 
 def get_people_with_new_honors_and_awards(department: Department,
                                           days_to_look_back=365) -> dict[str, list[HonorsAward]]:
     print("Looking for new honors and awards...")
     new_honors_and_awards = {}
-    for _, cv in department.__root__[:]:
+    for _, cv in department.root[:]:
         cv: CVResponse
         honors_awareds = get_new_honors_and_awards(cv,
                                                    days_to_look_back)
@@ -179,3 +201,29 @@ def print_people_with_new_honors_and_awards(department: Department,
             print(f'{name}, ({len(honors_and_awards)}stk)')
             for honor in honors_and_awards:
                 print(f"\t- {honor.name.no}")
+
+def get_skills_keyword(project_experience_skills: List[ProjectExperienceSkill]) -> list[str]:
+    return [skill.tags.no for skill in project_experience_skills]
+
+def get_year_in_review(department: Department, n_days_to_look_back: int=385):
+    """
+    This function takes a departmend and a year, and returns a list of people
+    and the new stuff they have added to their CV the last year
+    - projects
+    - certifications
+    - presentations
+    - honors and awards
+    """
+
+    # here I should include projects that starts earlier, but hasnt ended yet (ongoing projets)
+    projects_worked_on = get_people_with_new_projects(department, n_days_to_look_back)
+
+    new_courses = get_people_with_new_courses(department, n_days_to_look_back)
+
+    new_certifications = get_people_with_new_certifications(department, n_days_to_look_back)
+
+    new_presentations = get_people_with_new_presentations(department, n_days_to_look_back)
+
+    new_honors_and_awards = get_people_with_new_honors_and_awards(department, n_days_to_look_back)
+
+    return projects_worked_on, new_courses, new_certifications, new_presentations, new_honors_and_awards

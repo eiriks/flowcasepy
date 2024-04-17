@@ -2,56 +2,45 @@ from __future__ import annotations
 
 from typing import Any, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, RootModel
 
-from cvpartner.types.office import Office
+
+class Office(BaseModel):
+    _id: str
+    id: str
+    name: str
+    selected: bool
+    default_word_template_id: Any
+    default_ppt_template_id: Any
+    country_id: str
+    country_code: str
+    override_language_code: Any
+    num_users: int
+    num_users_activated: int
+    num_users_deactivated: int
 
 
 class Setting(BaseModel):
     _id: str
 
 
-# [
-#     {'_id': '531470a12f274fc51d000003',
-#      'id': '531470a12f274fc51d000003',
-#      'code': 'no', 'native_language_code':
-#      'no', 'selected': True,
-#      'default_ppt_template_id': None,
-#      'default_word_template_id': None, 'offices':
-#      [{'_id': '63b3d477eef8220fd65d7847', 'id': '63b3d477eef8220fd65d7847', 'name': 'Product Management', 'selected': True, 'default_word_template_id': None, 'default_ppt_template_id': None, 'country_id': '531470a12f274fc51d000003', 'country_code': 'no', 'override_language_code': None, 'num_users': 6}, {'_id': '63b3d4cb40717e0fb2e8b95a', 'id': '63b3d4cb40717e0fb2e8b95a', 'name': 'Executive Advisory', 'selected': True, 'default_word_template_id': None, 'default_ppt_template_id': None, 'country_id': '531470a12f274fc51d000003', 'country_code': 'no', 'override_language_code': None, 'num_users': 4},
-#       {'_id': '63b3d70930107c100a2bba48', 'id': '63b3d70930107c100a2bba48', 'name': 'Customer Success Services', 'selected': True, 'default_word_template_id': None, 'default_ppt_template_id': None, 'country_id': '531470a12f274fc51d000003', 'country_code': 'no', 'override_language_code': None, 'num_users': 2}, {'_id': '56d80bde69702d41da000008', 'id': '56d80bde69702d41da000008', 'name': 'Content Design', 'selected': True, 'default_word_template_id': None,
-#                                                                                                                                                                                                                                                                                                                         'default_ppt_template_id': None, 'country_id': '531470a12f274fc51d000003', 'country_code': 'no', 'override_language_code': None, 'num_users': 7}, {'_id': '56d7f5fd69702d248e000007', 'id': '56d7f5fd69702d248e000007', 'name': 'Frontend', 'selected': True, 'default_word_template_id': None, 'default_ppt_template_id': None, 'country_id': '531470a12f274fc51d000003', 'country_code': 'no', 'override_language_code': None, 'num_users': 37},
-#       {'_id': '56d7f5e169702d248e000005', 'id': '56d7f5e169702d248e000005', 'name': 'Platforms & Services', 'selected': True, 'default_word_template_id': None, 'default_ppt_template_id': None, 'country_id': '531470a12f274fc51d000003', 'country_code': 'no', 'override_language_code': None, 'num_users': 40}, {'_id': '56d7f59569702d248e000004', 'id': '56d7f59569702d248e000004', 'name': 'Admin', 'selected': True, 'default_word_template_id': None, 'default_ppt_template_id': None, 'country_id': '531470a12f274fc51d000003', 'country_code': 'no', 'override_language_code': None, 'num_users': 7}, {'_id': '5fd0b63c7958da0e882f6e8e', 'id': '5fd0b63c7958da0e882f6e8e', 'name': 'CX', 'selected': True, 'default_word_template_id': None, 'default_ppt_template_id': None, 'country_id': '531470a12f274fc51d000003', 'country_code': 'no', 'override_language_code': None, 'num_users': 16}, {'_id': '5fd0b8067958da0e892f6efd', 'id': '5fd0b8067958da0e892f6efd', 'name': 'UX', 'selected': True, 'default_word_template_id': None, 'default_ppt_template_id': None, 'country_id': '531470a12f274fc51d000003', 'country_code': 'no', 'override_language_code': None, 'num_users': 40}, {'_id': '56d7f60a69702d248e000008', 'id': '56d7f60a69702d248e000008', 'name': 'Data Engineering', 'selected': True, 'default_word_template_id': None, 'default_ppt_template_id': None, 'country_id': '531470a12f274fc51d000003', 'country_code': 'no', 'override_language_code': None, 'num_users': 30}, {'_id': '56d80bec69702d41da000009', 'id': '56d80bec69702d41da000009', 'name': 'Project Management',
-#                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 'selected': True, 'default_word_template_id': None, 'default_ppt_template_id': None, 'country_id': '531470a12f274fc51d000003', 'country_code': 'no', 'override_language_code': None, 'num_users': 6}, {'_id': '56d80bf269702d41da00000a', 'id': '56d80bf269702d41da00000a', 'name': 'Client Ops', 'selected': True, 'default_word_template_id': None, 'default_ppt_template_id': None, 'country_id': '531470a12f274fc51d000003', 'country_code': 'no', 'override_language_code': None, 'num_users': 10}],
-#      'setting': {'_id': '531470a12f274fc51d000004'}},
-#     {'_id': '56d7f54d69702d248e000000', 'id': '56d7f54d69702d248e000000', 'code': 'pl', 'native_language_code': 'int', 'selected': False, 'default_ppt_template_id': None,
-
-#      'default_word_template_id': None, 'offices': [{'_id': '5ed8dd1634697f1128a7d6a1', 'id': '5ed8dd1634697f1128a7d6a1', 'name': 'Business Development', 'selected': False, 'default_word_template_id': None, 'default_ppt_template_id': None, 'country_id': '56d7f54d69702d248e000000', 'country_code': 'pl', 'override_language_code': None, 'num_users': 14}, {'_id': '5ed8df97769ae6112751c537', 'id': '5ed8df97769ae6112751c537', 'name': 'Project Management', 'selected': False, 'default_word_template_id': None, 'default_ppt_template_id': None, 'country_id': '56d7f54d69702d248e000000', 'country_code': 'pl', 'override_language_code': None,
-#                                                                                                                                                                                                                                                                                                                                                                   'num_users': 7}, {'_id': '5ed8e0a9adb61e11163a7d63', 'id': '5ed8e0a9adb61e11163a7d63', 'name': 'Technology 302', 'selected': False, 'default_word_template_id': None,
-#                                                                                                                                                                                                                                                                                                                                                                                     'default_ppt_template_id': None,
-#                                                                                                                                                                                                                                                                                                                                                                                     'country_id': '56d7f54d69702d248e000000',
-#                                                                                                                                                                                                                                                                                                                                                                                     'country_code': 'pl', 'override_language_code': None, 'num_users': 20}, {'_id': '56d7f66669702d248e00000f', 'id': '56d7f66669702d248e00000f', 'name': 'Technology 304', 'selected': False, 'default_word_template_id': None, 'default_ppt_template_id': None, 'country_id': '56d7f54d69702d248e000000', 'country_code': 'pl', 'override_language_code': None, 'num_users': 16}, {'_id': '5be15ef8479943105ead0350', 'id': '5be15ef8479943105ead0350', 'name': 'Technology 301', 'selected': False, 'default_word_template_id': None, 'default_ppt_template_id': None, 'country_id': '56d7f54d69702d248e000000', 'country_code': 'pl', 'override_language_code': None, 'num_users': 15}, {'_id': '56d7f6b269702d248e000013', 'id': '56d7f6b269702d248e000013', 'name': 'People and Administration', 'selected': False, 'default_word_template_id': None, 'default_ppt_template_id': None, 'country_id': '56d7f54d69702d248e000000', 'country_code': 'pl', 'override_language_code': None, 'num_users': 1}, {'_id': '56d7f6ba69702d248e000014', 'id': '56d7f6ba69702d248e000014', 'name': 'Experience Design', 'selected': False, 'default_word_template_id': None, 'default_ppt_template_id': None, 'country_id': '56d7f54d69702d248e000000', 'country_code': 'pl', 'override_language_code': None, 'num_users': 12}, {'_id': '5fa2762a755ead10d0396563', 'id': '5fa2762a755ead10d0396563', 'name': 'Externals', 'selected': False, 'default_word_template_id': None, 'default_ppt_template_id': None, 'country_id': '56d7f54d69702d248e000000', 'country_code': 'pl', 'override_language_code': None, 'num_users': 3},
-#                                                    {'_id': '61965cc0631cf9113ebc4ef2', 'id': '61965cc0631cf9113ebc4ef2', 'name': 'Technology 306', 'selected': False, 'default_word_template_id': None,
-#                                                     'default_ppt_template_id': None, 'country_id': '56d7f54d69702d248e000000', 'country_code': 'pl', 'override_language_code': None, 'num_users': 15},
-#                                                    {'_id': '624c64cdd8eabf111dada285', 'id': '624c64cdd8eabf111dada285', 'name': 'DK&A PL', 'selected': False, 'default_word_template_id': None, 'default_ppt_template_id': None, 'country_id': '56d7f54d69702d248e000000', 'country_code': 'pl', 'override_language_code': None, 'num_users': 4}, {'_id': '620e05be4ef098116a5920ca', 'id': '620e05be4ef098116a5920ca', 'name': 'Tech Advisors', 'selected': False, 'default_word_template_id': None, 'default_ppt_template_id': None, 'country_id': '56d7f54d69702d248e000000', 'country_code': 'pl', 'override_language_code': None, 'num_users': 5}, {'_id': '63fc6a4f1a4f1f0fad6e8857', 'id': '63fc6a4f1a4f1f0fad6e8857', 'name': 'ITO', 'selected': False, 'default_word_template_id': None, 'default_ppt_template_id': None, 'country_id': '56d7f54d69702d248e000000', 'country_code': 'pl', 'override_language_code': None, 'num_users': 3}], 'setting': {'_id': '56d7f54d69702d248e000001'}}, {'_id': '56d7f55469702d248e000002', 'id': '56d7f55469702d248e000002', 'code': 'se', 'native_language_code': 'se', 'selected': False, 'default_ppt_template_id': None, 'default_word_template_id': None, 'offices': [{'_id': '6401de5ce398330fb1d5a943', 'id': '6401de5ce398330fb1d5a943', 'name': 'Design', 'selected': False, 'default_word_template_id': None, 'default_ppt_template_id': None, 'country_id': '56d7f55469702d248e000002', 'country_code': 'se', 'override_language_code': None, 'num_users': 0}, {'_id': '6401de68e39833479bd5a1a4', 'id': '6401de68e39833479bd5a1a4', 'name': 'Teknik', 'selected': False, 'default_word_template_id': None, 'default_ppt_template_id': None, 'country_id': '56d7f55469702d248e000002', 'country_code': 'se', 'override_language_code': None, 'num_users': 0}, {'_id': '6401de96e398330fb3d5a87a', 'id': '6401de96e398330fb3d5a87a', 'name': 'Business', 'selected': False, 'default_word_template_id': None, 'default_ppt_template_id': None, 'country_id': '56d7f55469702d248e000002', 'country_code': 'se', 'override_language_code': None, 'num_users': 0}], 'setting': {'_id': '56d7f55469702d248e000003'}},
-#     {'_id': '573dc9cf69702d08a5000000', 'id': '573dc9cf69702d08a5000000', 'code': 'us', 'native_language_code': 'int', 'selected': False, 'default_ppt_template_id': None, 'default_word_template_id': None, 'offices': [], 'setting': {'_id': '573dc9d069702d08a5000001'}}, {
-#         '_id': '62541ab26e5340000113ffb6', 'id': '62541ab26e5340000113ffb6', 'code': 'fi', 'native_language_code': 'fi', 'selected': False, 'default_ppt_template_id': None, 'default_word_template_id': None, 'offices': [], 'setting': {'_id': '62541ab31c42900e99bd651b'}},
-#     {'_id': '62bd38958dba4c000127048c', 'id': '62bd38958dba4c000127048c', 'code': 'dk', 'native_language_code': 'dk', 'selected': False, 'default_ppt_template_id': None, 'default_word_template_id': None, 'offices': [], 'setting': {'_id': '62bd389660b4f10db6cdc125'}}]
-
-
 class Country(BaseModel):
-    country_id: str = Field(..., alias="_id")
+    _id: str
+    id: str
     code: str
-    selected: bool
     native_language_code: str
-    word_template_id: Any
+    override_ui_language_code: Optional[str]
+    selected: bool
     default_ppt_template_id: Any
     default_word_template_id: Any
-    cv_template_id: Optional[str] = None
-    cv_template_type: Optional[str] = None
     offices: List[Office]
     setting: Setting
 
 
-class Countries(BaseModel):
-    __root__: List[Country]
+# class Model(BaseModel):
+#     __root__: List[ModelItem]
+
+
+
+class Countries(RootModel):
+    root: List[Country]

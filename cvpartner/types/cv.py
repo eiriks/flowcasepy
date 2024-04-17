@@ -242,52 +242,52 @@ class Image(BaseModel):
 
 class CVResponse(CVField):
     blogs: List[Blog] = []
-    born_day: Optional[int]
-    born_month: Optional[int]
+    born_day: Optional[int] = None
+    born_month: Optional[int] = None
     born_year: Optional[int] = None  # ??
     bruker_id: str
     certifications: Optional[List[Certification]] = None
-    courses: Optional[List[Course]]
-    custom_tag_ids: Optional[List]
+    courses: Optional[List[Course]] = None
+    custom_tag_ids: Optional[List] = None
     cv_roles: Optional[List[CvRole]]
-    default: Optional[bool]
+    default: Optional[bool] = None
     educations: Optional[List[Education]] = None
     honors_awards: Optional[List[HonorsAward]] = []
-    imported_date: Any
+    imported_date: Optional[Any] = None
     key_qualifications: Optional[List[KeyQualification]] = None
-    landline: Any
+    landline: Optional[Any] = None
     languages: Optional[List[Language]] = None
-    level: Any
-    locked_at: Any
-    locked_until: Any
-    name_multilang: Optional[Dict[str, Any]]
-    nationality: Optional[TranslatedString]
+    level: Optional[Any] = None
+    locked_at: Optional[Any] = None
+    locked_until: Optional[Any] = None
+    name_multilang: Optional[Dict[str, Any]] = None
+    nationality: Optional[TranslatedString] = None
     navn: str
     owner_updated_at_significant: Optional[str] = None
-    place_of_residence: Optional[TranslatedString]
+    place_of_residence: Optional[TranslatedString] = None
     positions: List[Position] = []
     presentations: List[Presentation] = []
     project_experiences: Optional[List[ProjectExperienceExpanded]] = None
     technologies: Optional[list[Technology]] = None
     telefon: Optional[str] = None
-    tilbud_id: Any
+    tilbud_id: Optional[Any] = None
     title: TranslatedString
     twitter: Optional[str] = None
     work_experiences: Optional[list[WorkExperience]] = None
-    name: Optional[str]
-    user_id: Optional[str]
-    company_id: Optional[str]
-    external_unique_id: Any
-    email: Optional[str]
-    country_code: Optional[str]
-    language_code: Optional[str]
-    language_codes: Optional[List[str]]
-    proposal: Any
-    custom_tags: Optional[List]
-    updated_ago: Optional[str]
-    template_document_type: Optional[str]
-    default_word_template_id: Optional[str]
-    default_ppt_template_id: Any
-    highlighted_roles: Optional[List]
-    image: Optional[Image]
-    can_write: Optional[bool]
+    name: Optional[str] = None
+    user_id: Optional[str] = None
+    company_id: Optional[str] = None
+    external_unique_id: Optional[Any] = None
+    email: Optional[str] = None
+    country_code: Optional[str] = None
+    language_code: Optional[str] = None
+    language_codes: Optional[List[str]] = None
+    proposal: Optional[Any] = None
+    custom_tags: Optional[List] = None
+    updated_ago: Optional[str] = None
+    template_document_type: Optional[str] = None
+    default_word_template_id: Optional[str] = None
+    default_ppt_template_id: Any = None
+    highlighted_roles: Optional[List] = None
+    image: Optional[Image] = None
+    can_write: Optional[bool] = None

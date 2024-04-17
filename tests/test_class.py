@@ -40,6 +40,8 @@ def test_age():
 
     cv = CVResponse(
         born_year=datetime.now().year - 40,
+        born_day=1,
+        born_month=1,
         _id='123',
         bruker_id='123',
         cv_roles=[],

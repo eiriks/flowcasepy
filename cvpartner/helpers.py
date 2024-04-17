@@ -11,6 +11,7 @@ from typing import Optional
 
 from cvpartner.types.cv import ProjectExperience
 from cvpartner.types.cv import CVResponse, Certification
+from cvpartner.types.department import Department
 from cvpartner.types.employee import Employee
 
 # set up logging to std out
@@ -78,6 +79,57 @@ def newest_project_is_older_than_n_months(cv, n_months: int = 3):
         return get_days_since_last_finished_project(projects[0]) > days_in_n_months
 
 
+def get_new_projects(cv: CVResponse,
+                     days_to_look_back: int = 365,
+                     language: str = 'no') -> list[ProjectExperienceExpanded]:
+    # what I want here is to get any ProjectExperienceExpanded that has was
+    # - ended last year
+    # - started last year
+    # - that is new-ish, but still not ended, assmuing an ongoing project
+
+    new_projects: list[ProjectExperienceExpanded] = []
+
+    for project in cv.project_experiences:
+
+        # started last year
+        if not project.year_from:
+            logger.warning(
+                f"{cv.navn} har et prosjekt uten start-årstall: {getattr(project.customer, language)}")
+            continue  # skip project without a start year
+
+        project_start_date = datetime.datetime(
+            year=int(project.year_from),
+            month=int(project.month_from) if project.month_from else 1,
+            day=1
+        ).astimezone()
+        now = datetime.datetime.now().astimezone()
+        delta_in_days_since_start = (now - project_start_date).days
+
+        if delta_in_days_since_start < days_to_look_back:
+            new_projects.append(project)
+
+        # ended last year
+        if project.year_to:
+            project_end_date = datetime.datetime(
+                year=int(project.year_to),
+                month=int(project.month_to) if project.month_to else 12,
+                day=1
+            ).astimezone()
+            delta_in_days_since_end = (now - project_end_date).days
+            if delta_in_days_since_end < days_to_look_back and project not in new_projects:
+                new_projects.append(project)
+
+        # is ongoing
+        # start date should be less than 4 years from now AND have no end_year
+        # Consultant A has been 7 years with customer Y..  Need to accept longer projects
+        YEARS_BACK_TO_CHECK = 8
+        if delta_in_days_since_start < YEARS_BACK_TO_CHECK*365 and not project.year_to and project not in new_projects:
+            # print(f'{cv.name} Ongoing project: {project.customer.no}')
+            new_projects.append(project)
+
+    return new_projects
+
+
 def get_new_courses(cv: CVResponse,
                     days_to_look_back: int = 365,
                     language: str = 'no') -> list[Course]:
@@ -85,7 +137,7 @@ def get_new_courses(cv: CVResponse,
     for course in cv.courses:
         if not course.year:
             logger.warning(
-                f"{cv.navn} har en uten årstall: {getattr(course.name, language)}")
+                f"{cv.navn} har et kurs uten årstall: {getattr(course.name, language)}")
             continue  # skip course without a year
 
         _month = int(course.month) if course.month else 1
@@ -104,6 +156,12 @@ def get_new_courses(cv: CVResponse,
 
     return new_courses
 
+def get_number_of_new_courses_by_department(department: Department, days_to_look_back: int = 365) -> int:
+    new_courses = 0
+    for _, cv in department.root:
+        new_courses += len(get_new_courses(cv, days_to_look_back))
+    return new_courses
+
 
 def get_new_certification(cv: CVResponse,
                           days_to_look_back: int = 365,
@@ -113,7 +171,7 @@ def get_new_certification(cv: CVResponse,
     for cert in cv.certifications:
         if not cert.year:
             logger.warning(
-                f"{cv.navn} har en uten årstall: {getattr(cert.name, language)}")
+                f"{cv.navn} har en sertifisering uten årstall: {getattr(cert.name, language)}")
             continue  # skip certification without a year
 
         _month = int(cert.month) if cert.month else 1
@@ -131,6 +189,18 @@ def get_new_certification(cv: CVResponse,
 
     return new_certifications
 
+def get_number_of_new_sertifications_from_department(department: Department,
+                                                     days_to_look_back: int = 365) -> int:
+    certifications = []
+    for _, cv in department.root:
+        new_certs = None
+        new_certs = get_new_certification(cv, days_to_look_back=days_to_look_back)
+        if new_certs:
+            #print(cv.name)
+            certifications.extend(new_certs)
+    return len(certifications)
+
+
 
 def get_new_honors_and_awards(cv: CVResponse,
                               days_to_look_back: int = 365,
@@ -139,7 +209,7 @@ def get_new_honors_and_awards(cv: CVResponse,
     for honor in cv.honors_awards:
         if not honor.year:
             logger.warning(
-                f"{cv.navn} har en uten årstall: {getattr(honor.name, language)}")
+                f"{cv.navn} har en award uten årstall: {getattr(honor.name, language)}")
             continue  # skip honor without a year
 
         _month = int(honor.month) if honor.month else 1
@@ -165,7 +235,7 @@ def get_new_presentations(cv: CVResponse,
     for presentation in cv.presentations:
         if not presentation.year:
             logger.warning(
-                f"{cv.navn} har en uten årstall: {getattr(presentation.description, language)}")
+                f"{cv.navn} har en pressentasjon uten årstall: {getattr(presentation.description, language)}")
             continue  # skip presentation without a year
 
         _month = int(presentation.month) if presentation.month else 1
@@ -211,29 +281,82 @@ def get_new_work_experiences(cv: CVResponse,
 
     return new_work_experiences
 
+def get_proper_project_dates(year: str|int, month: str|int, day: int=1):
+    month = int(month) if month else 1
+    year = int(year)
+    return datetime.datetime(
+        year=year,
+        month=month,
+        day=day
+    ).astimezone()
 
 def get_new_project_experiences(cv: CVResponse, days_to_look_back: int = 365, language: str = 'no') -> list[ProjectExperienceExpanded]:
     new_project_experiences: list[ProjectExperienceExpanded] = []
     for project in cv.project_experiences:
         if not project.year_from:
             logger.warning(
-                f"{cv.navn} har en prosjekt uten start-årstall: {getattr(project.customer, language)}")
+                f"{cv.navn} har et prosjekt uten start-årstall: {getattr(project.customer, language)}")
             continue
 
-        _month = int(project.month_from) if project.month_from else 1
-        cert_date = datetime.datetime(
-            year=int(project.year_from),
-            month=_month,
-            day=1
-        ).astimezone()
-        now = datetime.datetime.now().astimezone()
-        delta_in_days = (now - cert_date).days
+        # find start date
+        project_start_date = get_proper_project_dates(year=project.year_from, month=project.month_from)
 
-        if delta_in_days < days_to_look_back:
+        now = datetime.datetime.now().astimezone()
+        delta_in_days_since_start = (now - project_start_date).days
+
+        # find end date
+        if project.year_to:
+            project_end_date = get_proper_project_dates(year=project.year_to, month=project.month_to)
+        else:
+            # set end date to now, if no end date
+            project_end_date = datetime.datetime.now().astimezone()
+
+        delta_in_days_since_end = (now - project_end_date).days
+
+        # project is started less than a year ago, or is closed less than a year ago
+        if (delta_in_days_since_start < days_to_look_back) or \
+            (delta_in_days_since_end < days_to_look_back):
             new_project_experiences.append(project)
 
     return new_project_experiences
 
+
+def get_old_project_experiences(cv: CVResponse, older_than_days: int = 365, language: str = 'no') -> list[ProjectExperienceExpanded]:
+    old_project_experiences: list[ProjectExperienceExpanded] = []
+    for project in cv.project_experiences:
+        if not project.year_from:
+            logger.warning(
+                f"{cv.navn} har et prosjekt uten start-årstall: {getattr(project.customer, language)}")
+            continue
+
+        # project_start_date = get_proper_project_dates(year=project.year_from, month=project.month_from)
+        # now = datetime.datetime.now().astimezone()
+        # delta_in_days_sinze_start = (now - project_start_date).days
+
+        # find start date
+        project_start_date = get_proper_project_dates(year=project.year_from, month=project.month_from)
+
+        now = datetime.datetime.now().astimezone()
+        delta_in_days_since_start = (now - project_start_date).days
+
+        # find end date
+        if project.year_to:
+            project_end_date = get_proper_project_dates(year=project.year_to, month=project.month_to)
+        else:
+            # set end date to now, if no end date
+            project_end_date = datetime.datetime.now().astimezone()
+
+        delta_in_days_since_end = (now - project_end_date).days
+        # more than a year old since ended
+        if (delta_in_days_since_end > older_than_days):
+            old_project_experiences.append(project)
+
+        # # then look at start dates
+        # if (delta_in_days_since_start > older_than_days) or \
+        #     (delta_in_days_since_end > older_than_days):
+        #     old_project_experiences.append(project)
+
+    return old_project_experiences
 
 def get_new_educations(cv, days_to_look_back=365, language: str = 'no'):
     new_educations: list[Education] = []
@@ -241,10 +364,6 @@ def get_new_educations(cv, days_to_look_back=365, language: str = 'no'):
         if education.year_to is None:
             # un-finnished edu bussiness?
             continue  # skip
-
-        # edu has just year, not month or day
-        # year_from='1994',
-        # year_to='1998',
 
         if education.year_to > datetime.datetime.now() - datetime.timedelta(days=days_to_look_back):
             new_educations.append(education)
@@ -384,3 +503,28 @@ def get_tags_from_cv(cv: dict, lang: str = 'no') -> list[str]:
                     tags.append(group.get('tags').get(lang))
             # print(json.dumps(group.get('tags').get(lang), indent=2))
     return tags
+
+
+def get_keywords_from_projects(projects: list[ProjectExperienceExpanded]) -> list[str]:
+    words = []
+    for project in projects:
+        project: ProjectExperienceExpanded
+        for skills in project.project_experience_skills:
+            if skills.tags.no:
+                words.append(skills.tags.no)
+    return words
+
+def get_avg_new_keywords_pr_department(department: Department,
+                                       days_to_look_back: int = 365) -> float:
+    new_skills_counter = 0
+    for _, cv in department.root:
+        new_projects: list[ProjectExperienceExpanded] = get_new_project_experiences(cv, days_to_look_back)
+        new_skills = get_keywords_from_projects(new_projects)
+
+        old_projects: list[ProjectExperienceExpanded] = get_old_project_experiences(cv, days_to_look_back)
+        old_skills = get_keywords_from_projects(old_projects)
+
+        # find all word in new list that is not in old list
+        ture_new_skills = [skill for skill in new_skills if skill not in old_skills]
+        new_skills_counter += len(ture_new_skills)
+    return new_skills_counter/len(department.root)

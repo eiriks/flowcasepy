@@ -19,6 +19,18 @@ exploring.ipynb
 sonar-project.properties
 .scannerwork/
 
+
+.venv
+
+*.ipynb_checkpoints
+
+presentation_*
+
 /tests/data/*
 /tests/*.ipynb
+/tests/**/*.pptx
 example_cv.json
+
+cvpartner/notebooks/
+cvpartner/notebooks/**/*.csv
+cvpartner/notebooks/kpi_results/
