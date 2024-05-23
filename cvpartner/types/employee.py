@@ -71,7 +71,7 @@ class EmployeeMeta(BaseModel):
     id: int
 
 
-class SearchResult(BaseModel):
+class EmployeeSearchResult(BaseModel):
     cvs: List[EmployeeMeta]
     facets: Dict[str, Any]
     total: int

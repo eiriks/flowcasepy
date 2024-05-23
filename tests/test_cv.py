@@ -92,7 +92,7 @@ def test_list_countries(cv_partner):
 
 
 def test_list_offices(cv_partner):
-    offices = cv_partner.get_offices_from_country()
+    offices = cv_partner.list_offices_from_country()
     assert isinstance(offices, list)
 
 

@@ -22,6 +22,8 @@ sonar-project.properties
 
 .venv
 
+.env
+
 *.ipynb_checkpoints
 
 presentation_*

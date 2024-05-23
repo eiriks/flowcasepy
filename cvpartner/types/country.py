@@ -44,3 +44,9 @@ class Country(BaseModel):
 
 class Countries(RootModel):
     root: List[Country]
+
+    def __iter__(self):
+        return iter(self.root)
+
+    def __getitem__(self, item):
+        return self.root[item]

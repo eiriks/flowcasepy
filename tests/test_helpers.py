@@ -7,6 +7,7 @@ from cvpartner.helpers import get_highest_degree, get_graduation_year, get_email
 
 from cvpartner.helpers import remove_extra_whitespace, remove_ending_period, convert_developer_to_utvikler, \
     convert_enginer_to_engineer, rename_common_variations_in_dev, get_role_from_cv_roles
+from cvpartner.types.search_result import SearchResults
 
 
 def test_remove_extra_whitespace():
@@ -68,3 +69,8 @@ def test_get_email(cv_partner):
 #    exam_year[person.name] = {'degree': get_highest_degree(cv),
 #                                       'graduation_year': get_graduation_year(cv),
 #                                       'email': get_email(person)}
+
+
+def test_serach(cv_partner):
+    results = cv_partner.search_users("Eirik Stavelin")
+    assert type(results) == SearchResults

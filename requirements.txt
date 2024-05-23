@@ -14,5 +14,5 @@ requests==2.31.0
 six==1.16.0
 tomli==2.0.1
 wirerope==0.4.6
-pydantic==2.5.3
+pydantic==2.7.1
 python-pptx==0.6.23
