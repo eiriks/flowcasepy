@@ -114,10 +114,9 @@ class CVPartner():
             cv = self.get_user_cv(user.user_id, user.id)
             the_dep.append((user, cv))
 
-
         try:
-            return Department(root=the_dep)
-
+            department: Department = Department.model_validate({'root': the_dep})
+            return department
         except pydantic.ValidationError:
             print(self.ERROR_MESSAGE_PARSE + office_name)
             raise

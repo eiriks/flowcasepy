@@ -7,19 +7,25 @@ import pytest
 from cvpartner import CVPartner
 from cvpartner.helpers import get_role_from_cv_roles
 from cvpartner.types.cv import CVResponse
+from cvpartner.types.employee import Employee
 
 
-def test_class_instanciation():
-    cvp = CVPartner(org='noaignite', api_key=os.environ['CVPARTNER_API_KEY'])
-    assert cvp
+@pytest.fixture
+def cv_partner():
+    return CVPartner(org='noaignite', api_key=os.environ['CVPARTNER_API_KEY'])
 
 
-@pytest.mark.skip(reason="This is so slow..")
-def test_departmen():
+def test_class_instanciation_using_fixture(cv_partner):
+    assert cv_partner
+
+
+def test_get_emploees_by_department(cv_partner):
     t0 = datetime.now()
-    # print(f'starting: {t0}')
-    cvp = CVPartner(org='noaignite', api_key=os.environ['CVPARTNER_API_KEY'])
-    department = cvp.get_department()
+    department = cv_partner.get_emploees_by_department()
+    # assert I get a list of Employees back
+    assert isinstance(department, list)
+    assert isinstance(department[0], Employee)
+
     t1 = datetime.now()-t0
     print(f't1: {t1}')
     t2 = datetime.now()-t0
@@ -29,9 +35,9 @@ def test_departmen():
 
 
 @pytest.mark.skip(reason="This is so slow..")  # slow, 30+ seconds
-def test_departmen():
+def test_get_emploees_and_cvs_from_department():
     cvp = CVPartner(org='noaignite', api_key=os.environ['CVPARTNER_API_KEY'])
-    department = cvp.get_department()
+    department = cvp.get_emploees_and_cvs_from_department()
     print(len(department))
     assert len(department) > 0
 

@@ -10,6 +10,10 @@ from cvpartner.helpers import remove_extra_whitespace, remove_ending_period, con
 from cvpartner.types.search_result import SearchResults
 
 
+@pytest.fixture
+def cv_partner():
+    return CVPartner(org='noaignite', api_key=os.environ['CVPARTNER_API_KEY'])
+
 def test_remove_extra_whitespace():
     assert remove_extra_whitespace("   a  b  c  ") == "a b c"
     assert remove_extra_whitespace("a\tb\tc") == "a b c"
@@ -44,10 +48,6 @@ def test_get_role_from_cv_roles():
     assert get_role_from_cv_roles(cv_role) is None
 
 
-@pytest.fixture
-def cv_partner():
-    return CVPartner(org='noaignite', api_key=os.environ['CVPARTNER_API_KEY'])
-
 
 def test_get_highest_degree(cv_partner):
     cv = cv_partner.get_user_cv("5702cc5f69702d53c10088e8",
@@ -65,10 +65,6 @@ def test_get_email(cv_partner):
     cv = cv_partner.get_user_cv("5a16db4c40566607dc9eb862",
                                 "5a16db4c40566607dc9eb863")
     assert get_email(cv) == 'eirik.stavelin@noaignite.com'
-
-#    exam_year[person.name] = {'degree': get_highest_degree(cv),
-#                                       'graduation_year': get_graduation_year(cv),
-#                                       'email': get_email(person)}
 
 
 def test_serach(cv_partner):
