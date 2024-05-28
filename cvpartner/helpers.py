@@ -335,7 +335,7 @@ def get_old_project_experiences(cv: CVResponse, older_than_days: int = 365, lang
 
     return old_project_experiences
 
-def get_new_educations(cv, days_to_look_back=365, language: str = 'no'):
+def get_new_educations(cv, days_to_look_back=365):
     new_educations: list[Education] = []
     for education in cv.educations:
         if education.year_to is None:
