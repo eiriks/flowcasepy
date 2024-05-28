@@ -35,9 +35,8 @@ def test_get_emploees_by_department(cv_partner):
 
 
 @pytest.mark.skip(reason="This is so slow..")  # slow, 30+ seconds
-def test_get_emploees_and_cvs_from_department():
-    cvp = CVPartner(org='noaignite', api_key=os.environ['CVPARTNER_API_KEY'])
-    department = cvp.get_emploees_and_cvs_from_department()
+def test_get_emploees_and_cvs_from_department(cv_partner):
+    department = cv_partner.get_emploees_and_cvs_from_department()
     print(len(department))
     assert len(department) > 0
 

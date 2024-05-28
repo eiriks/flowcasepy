@@ -227,3 +227,39 @@ def get_year_in_review(department: Department, n_days_to_look_back: int=385):
     new_honors_and_awards = get_people_with_new_honors_and_awards(department, n_days_to_look_back)
 
     return projects_worked_on, new_courses, new_certifications, new_presentations, new_honors_and_awards
+
+def list_new_items_on_cv(cv: CVResponse, days_to_look_back: int=365):
+
+    presentations = get_new_presentations(cv, days_to_look_back)
+    certifications = get_new_certification(cv, days_to_look_back)
+    courses = get_new_courses(cv, days_to_look_back)
+    projects = get_new_projects(cv, days_to_look_back)
+    honors_and_awards = get_new_honors_and_awards(cv, days_to_look_back)
+
+    print(f'{cv.navn}')
+    print(f"Pressentasjoner: {len(presentations)}")
+    for presentation in presentations:
+        presentation: Presentation
+        print(
+            f"\t- {presentation.description.no} ({presentation.long_description.no}) ({presentation.year})")
+    print()
+    print(f"Sertifiseringer: {len(certifications)}")
+    for certification in certifications:
+        certification: Certification
+        print(f"\t- {certification.name.no} - ({certification.organiser.no} -{certification.year})")
+    print()
+    print(f"Kurs: {len(courses)}")
+    for course in courses:
+        course: Course
+        print(
+            f"\t- {course.name.no} \n {course.long_description.no} {course.program.no} ({course.year})")
+    print()
+    print(f"Priser og Awards: {len(honors_and_awards)}")
+    for honor in honors_and_awards:
+        print(f"\t- {honor.name.no}")
+
+    print()
+    print(f"Projects: {len(projects)}")
+    for project in projects:
+        project: ProjectExperienceExpanded
+        print(f"\t- {project.customer.no}")

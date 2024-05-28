@@ -97,11 +97,8 @@ def get_new_projects(cv: CVResponse,
                 f"{cv.navn} har et prosjekt uten start-årstall: {getattr(project.customer, language)}")
             continue  # skip project without a start year
 
-        project_start_date = datetime.datetime(
-            year=int(project.year_from),
-            month=int(project.month_from) if project.month_from else 1,
-            day=1
-        ).astimezone()
+        project_start_date = get_proper_project_dates(year=project.year_from, month=project.month_from)
+
         now = datetime.datetime.now().astimezone()
         delta_in_days_since_start = (now - project_start_date).days
 
@@ -110,11 +107,11 @@ def get_new_projects(cv: CVResponse,
 
         # ended last year
         if project.year_to:
-            project_end_date = datetime.datetime(
-                year=int(project.year_to),
+            project_end_date = get_proper_project_dates(
+                year=project.year_to,
                 month=int(project.month_to) if project.month_to else 12,
                 day=1
-            ).astimezone()
+                )
             delta_in_days_since_end = (now - project_end_date).days
             if delta_in_days_since_end < days_to_look_back and project not in new_projects:
                 new_projects.append(project)
@@ -126,6 +123,8 @@ def get_new_projects(cv: CVResponse,
         if delta_in_days_since_start < YEARS_BACK_TO_CHECK*365 and not project.year_to and project not in new_projects:
             # print(f'{cv.name} Ongoing project: {project.customer.no}')
             new_projects.append(project)
+    # sort new projects descending
+    new_projects.sort(key=lambda x: x.year_from, reverse=True)
 
     return new_projects
 
@@ -140,14 +139,9 @@ def get_new_courses(cv: CVResponse,
                 f"{cv.navn} har et kurs uten årstall: {getattr(course.name, language)}")
             continue  # skip course without a year
 
-        _month = int(course.month) if course.month else 1
-        course_date = datetime.datetime(
-            year=int(course.year),
-            month=_month,
-            day=1  # there is no day in course
-        ).astimezone()
+        course_date = get_proper_project_dates(year=course.year, month=course.month)
+
         now = datetime.datetime.now().astimezone()
-        # TypeError: can't subtract offset-naive and offset-aware datetimes
 
         delta_in_days = (now - course_date).days
 
@@ -174,12 +168,8 @@ def get_new_certification(cv: CVResponse,
                 f"{cv.navn} har en sertifisering uten årstall: {getattr(cert.name, language)}")
             continue  # skip certification without a year
 
-        _month = int(cert.month) if cert.month else 1
-        cert_date = datetime.datetime(
-            year=int(cert.year),
-            month=_month,
-            day=1
-        ).astimezone()
+        cert_date = get_proper_project_dates(year=cert.year, month=cert.month)
+
         now = datetime.datetime.now().astimezone()
         delta_in_days = (now - cert_date).days
 
@@ -212,12 +202,8 @@ def get_new_honors_and_awards(cv: CVResponse,
                 f"{cv.navn} har en award uten årstall: {getattr(honor.name, language)}")
             continue  # skip honor without a year
 
-        _month = int(honor.month) if honor.month else 1
-        honor_date = datetime.datetime(
-            year=int(honor.year),
-            month=_month,
-            day=1
-        ).astimezone()
+        honor_date = get_proper_project_dates(year=honor.year, month=honor.month)
+
         now = datetime.datetime.now().astimezone()
         delta_in_days = (now - honor_date).days
 
@@ -238,12 +224,8 @@ def get_new_presentations(cv: CVResponse,
                 f"{cv.navn} har en pressentasjon uten årstall: {getattr(presentation.description, language)}")
             continue  # skip presentation without a year
 
-        _month = int(presentation.month) if presentation.month else 1
-        presentation_date = datetime.datetime(
-            year=int(presentation.year),
-            month=_month,
-            day=1
-        ).astimezone()  # there is no day in presentation
+
+        presentation_date = get_proper_project_dates(year=presentation.year, month=presentation.month)
 
         now = datetime.datetime.now().astimezone()
         delta_in_days = (now - presentation_date).days
@@ -267,14 +249,9 @@ def get_new_work_experiences(cv: CVResponse,
                 f"{cv.navn} har en jobb uten start-årstall: {getattr(job.employer, language)}")
             continue  # skip work without a start year
 
-        _month = int(job.month_from) if job.month_from else 1
-        cert_date = datetime.datetime(
-            year=int(job.year_from),
-            month=_month,
-            day=1
-        ).astimezone()
+        work_date = get_proper_project_dates(year=job.year_from, month=job.month_from)
         now = datetime.datetime.now().astimezone()
-        delta_in_days = (now - cert_date).days
+        delta_in_days = (now - work_date).days
 
         if delta_in_days < days_to_look_back:
             new_work_experiences.append(job)
@@ -306,7 +283,10 @@ def get_new_project_experiences(cv: CVResponse, days_to_look_back: int = 365, la
 
         # find end date
         if project.year_to:
-            project_end_date = get_proper_project_dates(year=project.year_to, month=project.month_to)
+            project_end_date = get_proper_project_dates(
+                year=project.year_to,
+                month=project.month_to
+                )
         else:
             # set end date to now, if no end date
             project_end_date = datetime.datetime.now().astimezone()
@@ -329,10 +309,6 @@ def get_old_project_experiences(cv: CVResponse, older_than_days: int = 365, lang
                 f"{cv.navn} har et prosjekt uten start-årstall: {getattr(project.customer, language)}")
             continue
 
-        # project_start_date = get_proper_project_dates(year=project.year_from, month=project.month_from)
-        # now = datetime.datetime.now().astimezone()
-        # delta_in_days_sinze_start = (now - project_start_date).days
-
         # find start date
         project_start_date = get_proper_project_dates(year=project.year_from, month=project.month_from)
 
@@ -341,7 +317,8 @@ def get_old_project_experiences(cv: CVResponse, older_than_days: int = 365, lang
 
         # find end date
         if project.year_to:
-            project_end_date = get_proper_project_dates(year=project.year_to, month=project.month_to)
+            project_end_date = get_proper_project_dates(year=project.year_to,
+                                                        month=project.month_to)
         else:
             # set end date to now, if no end date
             project_end_date = datetime.datetime.now().astimezone()
@@ -369,8 +346,28 @@ def get_new_educations(cv, days_to_look_back=365, language: str = 'no'):
             new_educations.append(education)
     return new_educations
 
+def get_degree_candidates(degree: Optional[str]) -> str:
+    '''Function to return a standard name for a degree, from a user input string.'''
 
-def get_highest_degree(cv: dict) -> Optional[str]:
+    if degree:
+        degree = degree.lower()
+        if any(deg in degree for deg in ['phd', 'ph.d.', 'doktor', 'doctor']):
+            return 'phd'
+        if any(deg in degree for deg in
+                ['master', 'm.a.', 'm.s.', 'siviløkonom', 'sivilingeniør',
+                'cand scient', 'cand.scient.', 'cand.mag.', 'cand-mag',
+                'm. sc', 'm.sc.']):
+            return 'master'
+        if any(deg in degree for deg in ['b.a.', 'bs', 'ba', 'bachelor',
+                                            'b.sc.', 'b.sc', 'ingeniør', '3 year it education']):
+            return 'bachelor'
+    # 'Høyskolekandidat i programmering'
+    # that is two years. not a BA/BS
+
+
+
+def get_highest_degree(cv: CVResponse) -> Optional[str]:
+    # sample candidate degrees: phd, master, bachelor
     canditate_top_degrees = []
 
     for edu in cv.educations:
@@ -378,22 +375,7 @@ def get_highest_degree(cv: dict) -> Optional[str]:
             # skip unfinnished education
             continue
 
-        degree = edu.degree.no
-        # print(degree)
-        if degree:
-            degree = degree.lower()
-            if any(deg in degree for deg in ['phd', 'ph.d.', 'doktor', 'doctor']):
-                canditate_top_degrees.append('phd')
-            if any(deg in degree for deg in
-                   ['master', 'm.a.', 'm.s.', 'siviløkonom', 'sivilingeniør',
-                    'cand scient', 'cand.scient.', 'cand.mag.', 'cand-mag',
-                    'm. sc', 'm.sc.']):
-                canditate_top_degrees.append('master')
-            if any(deg in degree for deg in ['b.a.', 'bs', 'ba', 'bachelor',
-                                             'b.sc.', 'b.sc', 'ingeniør', '3 year it education']):
-                canditate_top_degrees.append('bachelor')
-        # 'Høyskolekandidat i programmering'
-        # that is two years. not a BA/BS
+        canditate_top_degrees.append(get_degree_candidates(edu.degree.no))
 
     # resolve
     if 'phd' in canditate_top_degrees:
@@ -405,7 +387,6 @@ def get_highest_degree(cv: dict) -> Optional[str]:
     # fallback for no hits
     return 'unknown'
 
-# Not used (used in Lønn)
 
 
 def get_email(person: Employee, convert_to_lowercase: bool = True) -> Optional[str]:
