@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from cvpartner.types.cv import Course, Education, HonorsAward, Presentation, ProjectExperienceExpanded, WorkExperience
+from cvpartner.types.cv import Course, Education, HonorsAward, Position, Presentation, ProjectExperienceExpanded, WorkExperience
 import re
 import logging
 import datetime
@@ -189,6 +189,31 @@ def get_number_of_new_sertifications_from_department(department: Department,
             #print(cv.name)
             certifications.extend(new_certs)
     return len(certifications)
+
+
+def get_new_positions(cv: CVResponse,
+                  days_to_look_back: int = 365,
+                  language: str = 'no') -> list[Position]:
+
+    new_positions: list[Position] = []
+    for position in cv.positions:
+        if not position.year_from:
+            logger.warning(
+                f"{cv.navn} har en stilling uten start-årstall: {getattr(position.name, language)}")
+            continue  # skip position without a start year
+
+        position_date = get_proper_project_dates(year=position.year_from, month=1)
+
+        now = datetime.datetime.now().astimezone()
+        delta_in_days = (now - position_date).days
+
+        if delta_in_days < days_to_look_back:
+            new_positions.append(position)
+        # possistion that are not ednded
+        if position.year_to is None or position.year_to in [' ', '', '0']:
+            new_positions.append(position)
+
+    return new_positions
 
 
 

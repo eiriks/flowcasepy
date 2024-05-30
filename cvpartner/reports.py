@@ -5,8 +5,8 @@ from typing import Dict, List
 
 from cvpartner.types.employee import Employee
 from cvpartner.types.department import Department
-from cvpartner.types.cv import CVResponse, Certification, Course, HonorsAward, Presentation, ProjectExperienceExpanded, ProjectExperienceSkill
-from cvpartner.helpers import get_new_courses, get_new_honors_and_awards, get_new_presentations, get_new_projects, sort_projects, get_new_certification
+from cvpartner.types.cv import CVResponse, Certification, Course, HonorsAward, Position, Presentation, ProjectExperienceExpanded, ProjectExperienceSkill
+from cvpartner.helpers import get_new_courses, get_new_honors_and_awards, get_new_positions, get_new_presentations, get_new_projects, sort_projects, get_new_certification
 
 logger = logging.getLogger(__name__)
 
@@ -235,6 +235,9 @@ def list_new_items_on_cv(cv: CVResponse, days_to_look_back: int=365):
     courses = get_new_courses(cv, days_to_look_back)
     projects = get_new_projects(cv, days_to_look_back)
     honors_and_awards = get_new_honors_and_awards(cv, days_to_look_back)
+    # add verv
+    positions = get_new_positions(cv, days_to_look_back)
+
 
     print(f'{cv.navn}')
     print(f"Pressentasjoner: {len(presentations)}")
@@ -263,3 +266,9 @@ def list_new_items_on_cv(cv: CVResponse, days_to_look_back: int=365):
     for project in projects:
         project: ProjectExperienceExpanded
         print(f"\t- {project.customer.no}")
+
+    print()
+    print(f"Positions: {len(positions)}")
+    for position in positions:
+        position: Position
+        print(f"\t- {position.name.no} ({position.year_from} - {position.year_to})")
