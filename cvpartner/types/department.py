@@ -11,3 +11,9 @@ class Department(BaseModel):
     root: List[Tuple[Employee, CVResponse]] = []
     def __len__(self):
         return self.root.__len__()
+
+    def __getitem__(self, item):
+        return self.root[item]
+
+    def __iter__(self):
+        return iter(self.root)
