@@ -36,3 +36,7 @@ example_cv.json
 cvpartner/notebooks/
 cvpartner/notebooks/**/*.csv
 cvpartner/notebooks/kpi_results/
+
+
+.DS_Store
+.vscode/
