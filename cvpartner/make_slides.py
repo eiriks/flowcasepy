@@ -106,7 +106,7 @@ def add_honors_and_awards_slide(prs: PP, layout, name: str, honors_and_awards: L
 
 def make_ppt_from_year_in_review(projects_worked_on: Dict[str, list[ProjectExperienceExpanded]],
                                      new_courses: Dict[str, list[Course]],
-                                     new_certifications: [Dict[str, list[Certification]]],
+                                     new_certifications: Dict[str, list[Certification]],
                                      new_presentations: Dict[str, list[Presentation]],
                                      new_honors_and_awards: Dict[str, list[HonorsAward]],
                                     department_name: str = 'Data engineering') -> bool:

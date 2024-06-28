@@ -335,10 +335,10 @@ def get_old_project_experiences(cv: CVResponse, older_than_days: int = 365, lang
             continue
 
         # find start date
-        project_start_date = get_proper_project_dates(year=project.year_from, month=project.month_from)
+        #project_start_date = get_proper_project_dates(year=project.year_from, month=project.month_from)
 
         now = datetime.datetime.now().astimezone()
-        delta_in_days_since_start = (now - project_start_date).days
+        #delta_in_days_since_start = (now - project_start_date).days
 
         # find end date
         if project.year_to:

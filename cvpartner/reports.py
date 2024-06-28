@@ -1,5 +1,4 @@
 # file with functions to generate reports
-import datetime
 import logging
 from typing import Dict, List
 
