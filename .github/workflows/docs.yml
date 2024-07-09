@@ -27,7 +27,8 @@ jobs:
       - run: pip install -e .
       # ADJUST THIS: build your documentation into docs/.
       # We use a custom build script for pdoc itself, ideally you just run `pdoc -o docs/ ...` here.
-      - run: python docs/make.py
+      #- run: python docs/make.py
+      - run: pdoc cvpartner -o ./docs --logo "https://media.licdn.com/dms/image/C4E0BAQHPo9Suae7ruw/company-logo_200_200/0/1630639540726/noaignitedk_logo?e=2147483647&v=beta&t=-6xLrUwidP235iJX12bNEPkAuvRM1ZZcQlQYQ1QKgQQ"
 
       - uses: actions/upload-pages-artifact@v3
         with:
