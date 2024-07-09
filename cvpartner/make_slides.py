@@ -7,6 +7,7 @@ from cvpartner.reports import get_skills_keyword
 
 from cvpartner.types.cv import Certification, Course, HonorsAward, Presentation, ProjectExperienceExpanded
 
+
 def add_experience_slide(prs: PP, layout, name: str, projects: List[ProjectExperienceExpanded]):
     slide = prs.slides.add_slide(layout)
     slide.shapes.title.text = f'{name} 👷🏻‍♀️'
@@ -21,6 +22,7 @@ def add_experience_slide(prs: PP, layout, name: str, projects: List[ProjectExper
         p.text = f'{", ".join(get_skills_keyword(pro.project_experience_skills))}'
         p.level = 1
     return slide
+
 
 def add_course_slide(prs: PP, layout, name: str, courses: List[Course], background_color=(250, 233, 150)):
 
@@ -40,6 +42,7 @@ def add_course_slide(prs: PP, layout, name: str, courses: List[Course], backgrou
         p.text = f'{course.long_description.no}'
         p.level = 1
     return slide
+
 
 def add_certification_slide(prs: PP, layout, name: str, certifications: List[Certification], background_color=(160, 250, 150)):
     slide = prs.slides.add_slide(layout)
@@ -62,6 +65,7 @@ def add_certification_slide(prs: PP, layout, name: str, certifications: List[Cer
             p.level = 1
     return slide
 
+
 def add_presentation_slide(prs: PP, layout, name: str, presentations: List[Presentation], background_color=(150, 250, 237)):
     slide = prs.slides.add_slide(layout)
 
@@ -82,6 +86,7 @@ def add_presentation_slide(prs: PP, layout, name: str, presentations: List[Prese
             p.text = f'{pres.description.no}'
             p.level = 1
     return slide
+
 
 def add_honors_and_awards_slide(prs: PP, layout, name: str, honors_and_awards: List[HonorsAward], background_color=(250, 150, 237)) -> bool:
     slide = prs.slides.add_slide(layout)
@@ -104,12 +109,14 @@ def add_honors_and_awards_slide(prs: PP, layout, name: str, honors_and_awards: L
             p.level = 1
     return slide
 
+
 def make_ppt_from_year_in_review(projects_worked_on: Dict[str, list[ProjectExperienceExpanded]],
-                                     new_courses: Dict[str, list[Course]],
-                                     new_certifications: Dict[str, list[Certification]],
-                                     new_presentations: Dict[str, list[Presentation]],
-                                     new_honors_and_awards: Dict[str, list[HonorsAward]],
-                                    department_name: str = 'Data engineering') -> bool:
+                                 new_courses: Dict[str, list[Course]],
+                                 new_certifications: Dict[str, list[Certification]],
+                                 new_presentations: Dict[str, list[Presentation]],
+                                 new_honors_and_awards: Dict[str, list[HonorsAward]],
+                                 department_name: str = 'Data engineering'
+                                 ) -> bool:
 
     try:
         prs = PP()

@@ -71,6 +71,8 @@ def print_people_with_new_certifications(department: Department,
 def get_people_with_new_projects(department: Department,
                                  days_to_look_back: int = 365,
                                  verbose: bool = False) -> dict[str, list[ProjectExperienceExpanded]]:
+    """Get all users with new projects. 
+    Returns a dictionary with the user name as key and a list of projects as value."""
     if verbose:
         print("Looking for new projects...")
 
@@ -138,7 +140,7 @@ def print_people_who_might_have_forgotten_to_put_current_work_on_cv(
 ) -> None:
     from cvpartner.helpers import newest_project_is_older_than_n_months
     print("Looking for people who might have forgotten to put current work on CV...")
-    for persone, cv in department.root[:]:
+    for _, cv in department.root[:]:
         if newest_project_is_older_than_n_months(cv, months_to_look_back):
             print(cv.navn)
 
@@ -204,17 +206,24 @@ def print_people_with_new_honors_and_awards(department: Department,
 def get_skills_keyword(project_experience_skills: List[ProjectExperienceSkill]) -> list[str]:
     return [skill.tags.no for skill in project_experience_skills]
 
-def get_year_in_review(department: Department, n_days_to_look_back: int=385):
+def get_year_in_review(department: Department, n_days_to_look_back: int=365) -> tuple[dict, dict, dict, dict, dict]:
     """
-    This function takes a departmend and a year, and returns a list of people
-    and the new stuff they have added to their CV the last year
-    - projects
-    - certifications
-    - presentations
-    - honors and awards
-    """
+    This function takes a department and a number of days to look back, and returns a list of people
+    and the new stuff they have added to their CV in the given period.
 
-    # here I should include projects that starts earlier, but hasnt ended yet (ongoing projets)
+    Args:
+        department (Department): The department for which to retrieve the year in review.
+        n_days_to_look_back (int, optional): The number of days to look back. Defaults to 365.
+
+    Returns:
+        tuple: A tuple containing the following lists:
+            - projects_worked_on: List of people with new projects.
+            - new_courses: List of people with new courses.
+            - new_certifications: List of people with new certifications.
+            - new_presentations: List of people with new presentations.
+            - new_honors_and_awards: List of people with new honors and awards.
+    """
+    # here I should include projects that start earlier but haven't ended yet (ongoing projects)
     projects_worked_on = get_people_with_new_projects(department, n_days_to_look_back)
 
     new_courses = get_people_with_new_courses(department, n_days_to_look_back)
@@ -227,16 +236,20 @@ def get_year_in_review(department: Department, n_days_to_look_back: int=385):
 
     return projects_worked_on, new_courses, new_certifications, new_presentations, new_honors_and_awards
 
-def list_new_items_on_cv(cv: CVResponse, days_to_look_back: int=365):
+def print_new_items_on_cv(cv: CVResponse, days_to_look_back: int=365) -> None:
+    """
+    Prints the new items on a CV within a specified number of days.
 
+    Args:
+        cv (CVResponse): The CV to print the new items from.
+        days_to_look_back (int, optional): The number of days to look back for new items. Defaults to 365.
+    """
     presentations = get_new_presentations(cv, days_to_look_back)
     certifications = get_new_certification(cv, days_to_look_back)
     courses = get_new_courses(cv, days_to_look_back)
     projects = get_new_projects(cv, days_to_look_back)
     honors_and_awards = get_new_honors_and_awards(cv, days_to_look_back)
-    # add verv
     positions = get_new_positions(cv, days_to_look_back)
-
 
     print(f'{cv.navn}')
     print(f"Pressentasjoner: {len(presentations)}")

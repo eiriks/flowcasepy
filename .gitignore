@@ -19,9 +19,11 @@ exploring.ipynb
 sonar-project.properties
 .scannerwork/
 
+.DS_Store
+.pytest_cache/
+.vscode/
 
 .venv
-
 .env
 
 *.ipynb_checkpoints

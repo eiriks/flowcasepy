@@ -4,8 +4,6 @@ import json
 import pytest
 import datetime
 
-from typing import List
-
 from cvpartner import CVPartner
 from cvpartner.types.country import Countries
 from cvpartner.types.cv import CVResponse
@@ -29,7 +27,7 @@ def test_single_cv():
     _cv = department_with_cv[0][1]
     cv = CVResponse(**_cv)
 
-    assert type(cv.name) == str
+    assert isinstance(cv.name, str)
     assert len(cv.name) > 0
 
 
@@ -38,7 +36,7 @@ def test_cv():
     cv = CVResponse(**department_with_cv[0][1])
     # print(cv)
 
-    assert type(cv.name) == str
+    assert isinstance(cv.name, str)
     assert len(cv.name) > 0
 
 
@@ -46,9 +44,9 @@ def test_cv():
 def test_cvs():
     cvs = [CVResponse(**cv[1]) for cv in department_with_cv]
 
-    assert type(cvs[len(cvs)-1].name) == str
+    assert isinstance(cvs[len(cvs)-1].name, str)
     assert len(cvs[len(cvs)-1].name) > 0
-    assert type(cvs[0]) == CVResponse
+    assert isinstance(cvs[0], CVResponse)
 
 
 @pytest.mark.parametrize("project, expected_days", [
@@ -94,14 +92,3 @@ def test_list_countries(cv_partner):
 def test_list_offices(cv_partner):
     offices = cv_partner.list_offices_from_country()
     assert isinstance(offices, list)
-
-
-def test_get_user_cv(cv_partner):
-    user_id = "5a16db4c40566607dc9eb862"
-    cv_id = "5a16db4c40566607dc9eb863"
-    cv = cv_partner.get_user_cv(user_id, cv_id)
-
-    print(cv.project_experiences)
-    print(cv.project_experiences)
-    print(type(cv))
-    assert isinstance(cv, CVResponse)

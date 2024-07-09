@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 # grab date parts from project
 # put together a proper python date
 def create_dates_from_project(project: ProjectExperience) -> tuple[datetime.datetime, datetime.datetime | None, int]:
+    """Function to make a best guess at the start and end dates of a project."""
     month_from = int(project.month_from) if project.month_from else 1
     month_to = int(project.month_to) if project.month_to else 1
     year_from = int(project.year_from) if project.year_from else 1
@@ -42,7 +43,9 @@ def create_dates_from_project(project: ProjectExperience) -> tuple[datetime.date
 
 
 def sort_projects(cv: CVResponse,
-                  return_newest_first: bool = True) -> list[tuple[datetime.datetime, datetime.datetime | None, int, dict]]:
+                  return_newest_first: bool = True
+                  ) -> list[tuple[datetime.datetime, datetime.datetime | None, int, dict]]:
+    """Sort projects by date, newest first or oldest first."""
     projects_to_sort = []
     for project in cv.project_experiences:
         date_from, date_to, delta_monts = create_dates_from_project(project)
@@ -64,7 +67,7 @@ def get_days_since_last_finished_project(project: tuple) -> int:
 
 
 # Dersom feltet «fra-til» har et «til-dato» > 3mnd gammel
-def newest_project_is_older_than_n_months(cv, n_months: int = 3):
+def newest_project_is_older_than_n_months(cv: CVResponse, n_months: int = 3):
     projects = sort_projects(cv)
     if not projects:
         # no project experiences found
@@ -241,14 +244,24 @@ def get_new_honors_and_awards(cv: CVResponse,
 def get_new_presentations(cv: CVResponse,
                           days_to_look_back: int = 365,
                           language: str = 'no') -> list[Presentation]:
+    """
+    Retrieves a list of new presentations from the given CV response.
 
+    Args:
+        cv (CVResponse): The CV response object containing the presentations.
+        days_to_look_back (int, optional): The number of days to look back for new presentations. Defaults to 365.
+        language (str, optional): The language to use for logging warnings. Defaults to 'no'.
+
+    Returns:
+        list[Presentation]: A list of new presentations.
+
+    """
     new_presentations: list[Presentation] = []
     for presentation in cv.presentations:
         if not presentation.year:
             logger.warning(
                 f"{cv.navn} har en pressentasjon uten årstall: {getattr(presentation.description, language)}")
             continue  # skip presentation without a year
-
 
         presentation_date = get_proper_project_dates(year=presentation.year, month=presentation.month)
 
