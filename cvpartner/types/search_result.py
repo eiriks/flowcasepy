@@ -76,7 +76,7 @@ class SearchItem(BaseModel):
     include_officeless_reference_projects: bool
     selected_tag_ids: List
     override_language_code:  Optional[str] = None
-    default_cv_template_id: None
+    default_cv_template_id: Optional[str] = None
     image: Image
     name: str
     telephone: Optional[str] = None
