@@ -56,3 +56,15 @@ DEPARTMENT_NAME = 'Department of Magical Accidents and Catastrophes'
 
 department = cvp.get_emploees_and_cvs_from_department(DEPARTMENT_NAME)
 ```
+
+## Documentation
+pdoc was tested..
+
+I find the github workflow (.github/workflows/docs.yaml)
+
+```
+ pdoc cvpartner -o ./docs --logo "http..."
+```
+But where does the generated html gets deployed?
+
+Oh.. here: https://eiriks.github.io/cvpartnerpy/cvpartner.html
