@@ -1,26 +1,25 @@
-
-import os
-import json
-import pytest
 import datetime
+import json
+import os
+
+import pytest
 
 from cvpartner import CVPartner
+from cvpartner.helpers import get_days_since_last_finished_project
 from cvpartner.types.country import Countries
 from cvpartner.types.cv import CVResponse
 from cvpartner.types.department import Department
-from cvpartner.helpers import get_days_since_last_finished_project
-
-
 
 # get department with cvs
-department_with_cv = json.loads(
-    open('tests/data/department_with_cvs.json').read())
+department_with_cv = json.loads(open("tests/data/department_with_cvs.json").read())
 
 
-@pytest.mark.skip(reason="go back and encure that the json file is correct. Ither it is old and in wrong format, or this model_validate is no longer used in pydantic V2")
+@pytest.mark.skip(
+    reason="go back and encure that the json file is correct. Ither it is old and in wrong format, or this model_validate is no longer used in pydantic V2"
+)
 def test_mapping_department():
     department_with_cv_object = Department.model_validate(department_with_cv)
-    assert type(department_with_cv_object) == Department
+    assert type(department_with_cv_object) is Department
 
 
 def test_single_cv():
@@ -44,16 +43,26 @@ def test_cv():
 def test_cvs():
     cvs = [CVResponse(**cv[1]) for cv in department_with_cv]
 
-    assert isinstance(cvs[len(cvs)-1].name, str)
-    assert len(cvs[len(cvs)-1].name) > 0
+    assert isinstance(cvs[len(cvs) - 1].name, str)
+    assert len(cvs[len(cvs) - 1].name) > 0
     assert isinstance(cvs[0], CVResponse)
 
 
-@pytest.mark.parametrize("project, expected_days", [
-    (('Project1', datetime.datetime.now() -
-     datetime.timedelta(days=365), 'Company1', 'Description1'), 365),
-    (('Project2', None, 'Company2', 'Description2'), 0)
-])
+@pytest.mark.parametrize(
+    "project, expected_days",
+    [
+        (
+            (
+                "Project1",
+                datetime.datetime.now() - datetime.timedelta(days=365),
+                "Company1",
+                "Description1",
+            ),
+            365,
+        ),
+        (("Project2", None, "Company2", "Description2"), 0),
+    ],
+)
 def test_get_days_since_last_finished_project(project, expected_days):
     assert get_days_since_last_finished_project(project) == expected_days
 
@@ -63,7 +72,7 @@ def test_get_days_since_last_finished_project(project, expected_days):
 
 @pytest.fixture
 def cv_partner():
-    return CVPartner(org='noaignite', api_key=os.environ['CVPARTNER_API_KEY'])
+    return CVPartner(org="noaignite", api_key=os.environ["CVPARTNER_API_KEY"])
 
 
 def test_get_employees_by_department(cv_partner):

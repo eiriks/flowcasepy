@@ -1,5 +1,3 @@
-
-
 from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
@@ -36,7 +34,8 @@ class Titles(BaseModel):
 
 
 class Employee(BaseModel):
-    '''The v4 version of the API'''
+    """The v4 version of the API"""
+
     image: Image
     title: Optional[str] = None
     titles: Titles

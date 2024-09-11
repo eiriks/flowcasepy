@@ -18,10 +18,11 @@ import requests
 import pydantic
 
 
-
 # URLs
 USERS_URL_BASE = "https://{org}.cvpartner.com/api/v1/users?offset={offset}"
-USERS_URL_BASE_SEARCH = "https://{org}.cvpartner.com/api/v2/users/search?deactivated=false&name={name}"
+USERS_URL_BASE_SEARCH = (
+    "https://{org}.cvpartner.com/api/v2/users/search?deactivated=false&name={name}"
+)
 USERS_URL_BASE_SEARCH_V4 = "https://{org}.cvpartner.com/api/v4/search"
 
 CV_URL_BASE = "https://{org}.cvpartner.com/api/v3/cvs/{user_id}/{cv_id}"
@@ -37,24 +38,24 @@ URL_CUSTOMER = "https://{org}.cvpartner.com/api/v2/company/cv/customers/{custome
 log = logging.getLogger(__name__)
 
 
-class CVPartner():
-    """Class for interacting with CVPartner API. Docs for API at docs.cvpartner.com """
+class CVPartner:
+    """Class for interacting with CVPartner API. Docs for API at docs.cvpartner.com"""
 
     ERROR_MESSAGE_DECODE = "Couldn't decode response from CVPartner:\n"
     ERROR_MESSAGE_PARSE = "Couldn't parse response from CVPartner:\n"
 
-    def __init__(self, org:str, api_key: str, verbose: bool = False):
+    def __init__(self, org: str, api_key: str, verbose: bool = False):
         """Set up the CVPartner API client."""
         self._auth_header = {"Authorization": f'Token token="{api_key}"'}
         self.org = org
         """Name of the organization in CVPartner. It's the subdomain in the URL."""
         self.verbose = verbose
         """If True, print debug messages to stdout."""
-        
 
     def get_customers_by_name(self, customer_name: str, size=10, offset=0) -> Customers:
         url = URL_CUSTOMER_SEARCH.format(
-            org=self.org, customer_name=customer_name, size=size, offset=offset)
+            org=self.org, customer_name=customer_name, size=size, offset=offset
+        )
         r = requests.get(url, headers=self._auth_header)
 
         try:
@@ -69,16 +70,17 @@ class CVPartner():
             print(self.ERROR_MESSAGE_PARSE + r.text)
             raise
 
-    def get_emploees_by_department(self, office_name: str = 'Data Engineering', size=100) -> Optional[List[Employee]]:
+    def get_emploees_by_department(
+        self, office_name: str = "Data Engineering", size=100
+    ) -> Optional[List[Employee]]:
         # find office ID from name
         offices = self.list_offices_from_country()
         # filter down to only the match, if any
 
-
         office_id = [o.id for o in offices if o.name == office_name][0]
 
         if not office_id:
-            log.warning(f'No office found with name {office_name}!')
+            log.warning(f"No office found with name {office_name}!")
             return []
         # do a "search" for users in that office
         url = USERS_URL_BASE_SEARCH_V4.format(org=self.org)
@@ -99,7 +101,9 @@ class CVPartner():
             raise
 
         try:
-            search_result: EmployeeSearchResult = EmployeeSearchResult.model_validate(user_data)
+            search_result: EmployeeSearchResult = EmployeeSearchResult.model_validate(
+                user_data
+            )
             # return list of Employee objects
             return [emp_meta.cv for emp_meta in search_result.cvs]
 
@@ -107,12 +111,13 @@ class CVPartner():
             print(self.ERROR_MESSAGE_PARSE + r.text)
             raise
 
-    def get_emploees_and_cvs_from_department(self, office_name: str = 'Data Engineering', size=100) -> Department | None:
+    def get_emploees_and_cvs_from_department(
+        self, office_name: str = "Data Engineering", size=100
+    ) -> Department | None:
         # this fails by returning 100, it should be limited to size of department...
         # TODO: fix this
 
-        users: list[Employee] = self.get_emploees_by_department(
-            office_name, size)
+        users: list[Employee] = self.get_emploees_by_department(office_name, size)
 
         the_dep = []
 
@@ -121,20 +126,20 @@ class CVPartner():
             the_dep.append((user, cv))
 
         try:
-            department: Department = Department.model_validate({'root': the_dep})
+            department: Department = Department.model_validate({"root": the_dep})
             return department
         except pydantic.ValidationError:
             print(self.ERROR_MESSAGE_PARSE + office_name)
             raise
 
     def search_users(self, query: str, only_norway=True) -> SearchResults:
-        log.debug(f'Retreiving user {query} from API...')
+        log.debug(f"Retreiving user {query} from API...")
         search_url = USERS_URL_BASE_SEARCH.format(org=self.org, name=query)
 
         if only_norway:
-            offices_url = ''
-            for office in self.list_offices_from_country(country_code='no'):
-                offices_url += f'&office_ids[]={office.id}'
+            offices_url = ""
+            for office in self.list_offices_from_country(country_code="no"):
+                offices_url += f"&office_ids[]={office.id}"
             search_url += offices_url
 
         r = requests.get(search_url, headers=self._auth_header)
@@ -153,9 +158,8 @@ class CVPartner():
         return search_result
 
     def get_user_cv(self, user_id: str, cv_id: str) -> CVResponse:
-        log.debug(f'Retreiving user {user_id} CV {cv_id} from API...')
-        cv_url = CV_URL_BASE.format(
-            org=self.org, user_id=user_id, cv_id=cv_id)
+        log.debug(f"Retreiving user {user_id} CV {cv_id} from API...")
+        cv_url = CV_URL_BASE.format(org=self.org, user_id=user_id, cv_id=cv_id)
         r = requests.get(cv_url, headers=self._auth_header)
         try:
             cv_data = r.json()
@@ -188,8 +192,7 @@ class CVPartner():
             print(self.ERROR_MESSAGE_PARSE + r.text)
             raise
 
-
-    def list_offices_from_country(self, country_code: str = 'no') -> list[Office]:
+    def list_offices_from_country(self, country_code: str = "no") -> list[Office]:
         """return name and Id of offices, aka departments"""
         countries: Countries = self.list_countries()
         offices = [c.offices for c in countries.root if c.code == country_code][0]

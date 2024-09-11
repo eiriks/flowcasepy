@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 class Office(BaseModel):
     """Office is what we call department.
     'UX', 'CX', 'Frontend' and 'Platforms & services' are all offices."""
+
     office_id: str = Field(..., alias="_id")
     # _id: str
     name: str

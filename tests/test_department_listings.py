@@ -1,7 +1,7 @@
 import json
 import pytest
 
-department = json.loads(open('tests/data/department.json').read())
+department = json.loads(open("tests/data/department.json").read())
 
 
 print(department[0])
@@ -31,6 +31,7 @@ def test_list_dept_by_time_since_first_project_expeirence_was_started():
 
 # List dept by times sinze last project_expeirence that was longer than 3 months
 # (expected to filter out summer jobs, internships etc)
+
 
 @pytest.mark.skip(reason="TDD")
 def test_list_dept_by_time_sinze_last_project_expeirence_that_was_longer_than_3_months():
@@ -62,6 +63,7 @@ def test_group_department_into_4_groups():
 # Selvstendige konsulenter med minimum - over de siste 2 års erfaring som er relevant for det aktuelle området. Konsulenten har høyere utdannelse, anglende utdanning kan kompenseres med lengre erfaring
 # • Level 4: < 2 years experience
 # Konsulenter med under 2 års erfaring som er relevant for det aktuelle området. Konsulenten har høyere utdannelse, minimum mastergrad, manglende utdanning kan kompenseres med lengre erfaring. "
+
 
 @pytest.mark.skip(reason="TDD")
 def test_group_department_into_4_levels():

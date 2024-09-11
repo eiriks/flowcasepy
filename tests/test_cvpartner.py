@@ -1,6 +1,7 @@
 import os
+
 import pytest
-import requests
+
 # import requests_mock
 from cvpartner import CVPartner
 from cvpartner.types.customer import Customers
@@ -8,15 +9,13 @@ from cvpartner.types.customer import Customers
 
 @pytest.fixture
 def cv_partner():
-    return CVPartner(org='noaignite', api_key=os.environ['CVPARTNER_API_KEY'])
+    return CVPartner(org="noaignite", api_key=os.environ["CVPARTNER_API_KEY"])
 
 
 def test_get_customers_by_name(cv_partner):
     customers = cv_partner.get_customers_by_name("nor", size=10, offset=0)
-    assert type(customers) == Customers
+    assert type(customers) is Customers
     assert len(customers) == 10
-
-
 
 
 # def test_get_customer_success(cv_partner, requests_mock):

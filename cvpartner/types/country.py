@@ -42,7 +42,8 @@ class Country(BaseModel):
 
 
 class Countries(RootModel):
-    '''Root model for countries'''
+    """Root model for countries"""
+
     root: List[Country]
 
     def __iter__(self):

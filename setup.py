@@ -14,17 +14,17 @@ from shutil import rmtree
 from setuptools import find_packages, setup, Command
 
 # Package meta-data.
-NAME = 'cvpartnerpy'
-DESCRIPTION = 'A python package for scraping cvpartner api'
-URL = 'https://github.com/peakBreaker/cvpartnerpy'
-EMAIL = 'andershurum@gmail.com'
-AUTHOR = 'Anders L. Hurum'
-REQUIRES_PYTHON = '>=3.5.0'
-DEFAULT_VERSION = '0.0.5'  # Invalid version
+NAME = "cvpartnerpy"
+DESCRIPTION = "A python package for scraping cvpartner api"
+URL = "https://github.com/peakBreaker/cvpartnerpy"
+EMAIL = "andershurum@gmail.com"
+AUTHOR = "Anders L. Hurum"
+REQUIRES_PYTHON = ">=3.5.0"
+DEFAULT_VERSION = "0.0.5"  # Invalid version
 
 # What packages are required for this module to be executed?
-with open('requirements.txt', 'r') as f:
-    REQUIRED = f.read().split('\n')
+with open("requirements.txt", "r") as f:
+    REQUIRED = f.read().split("\n")
 
 
 # What packages are optional?
@@ -42,22 +42,22 @@ here = os.path.abspath(os.path.dirname(__file__))
 # Import the README and use it as the long-description.
 # Note: this will only work if 'README.md' is present in your MANIFEST.in file!
 try:
-    with io.open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
-        long_description = '\n' + f.read()
+    with io.open(os.path.join(here, "README.md"), encoding="utf-8") as f:
+        long_description = "\n" + f.read()
 except FileNotFoundError:
     long_description = DESCRIPTION
 
 # Load the package's __version__.py module as a dictionary.
 about = {}
-about['__version__'] = os.environ.get('CVPARTNER_PY_VERSION', DEFAULT_VERSION)
+about["__version__"] = os.environ.get("CVPARTNER_PY_VERSION", DEFAULT_VERSION)
 
-print('Libarary version is set to {}'.format(about["__version__"]))
+print("Libarary version is set to {}".format(about["__version__"]))
 
 
 class CleanCommand(Command):
     """Support for setup.py clean"""
 
-    description = 'Cleans build and dist'
+    description = "Cleans build and dist"
     user_options = []
 
     def initialize_options(self):
@@ -68,9 +68,9 @@ class CleanCommand(Command):
 
     def run(self):
         try:
-            print('CLEAR:INFO: Removing previous builds...')
-            rmtree(os.path.join(here, 'dist'))
-            print('CLEAR:INFO: Successfully removed prev builds!')
+            print("CLEAR:INFO: Removing previous builds...")
+            rmtree(os.path.join(here, "dist"))
+            print("CLEAR:INFO: Successfully removed prev builds!")
         except OSError:
             pass
 
@@ -78,13 +78,13 @@ class CleanCommand(Command):
 class PublishCommand(Command):
     """Support setup.py upload."""
 
-    description = 'Build and publish the package.'
+    description = "Build and publish the package."
     user_options = []
 
     @staticmethod
     def status(s):
         """Prints things with some formatting"""
-        print('PUBLISH:STATUS: {0}'.format(s))
+        print("PUBLISH:STATUS: {0}".format(s))
 
     def initialize_options(self):
         pass  # dunno what this does
@@ -93,54 +93,46 @@ class PublishCommand(Command):
         pass  # dunno what this does
 
     def run(self):
-
-        dist_dir = os.path.join(here, 'dist')
-        self.status('Build done - ls of dist: {}'.format(os.listdir(dist_dir)))
+        dist_dir = os.path.join(here, "dist")
+        self.status("Build done - ls of dist: {}".format(os.listdir(dist_dir)))
 
         # If we ever want to open source the package
-        self.status('Uploading the package to PyPI via Twine')
+        self.status("Uploading the package to PyPI via Twine")
         subprocess.check_call("twine upload dist/* --verbose", shell=True)
 
-        self.status('Success! Exiting..')
+        self.status("Success! Exiting..")
         sys.exit()
 
 
 # Where the magic happens:
 setup(
     name=NAME,
-    version=about['__version__'],
+    version=about["__version__"],
     description=DESCRIPTION,
     long_description=long_description,
-    long_description_content_type='text/markdown',
+    long_description_content_type="text/markdown",
     author=AUTHOR,
     author_email=EMAIL,
     python_requires=REQUIRES_PYTHON,
     url=URL,
-    packages=find_packages(
-        exclude=["tests", "*.tests", "*.tests.*", "tests.*"]),
+    packages=find_packages(exclude=["tests", "*.tests", "*.tests.*", "tests.*"]),
     # If your package is a single module, use this instead of 'packages':
     # py_modules=['mypackage'],
-
-
     install_requires=REQUIRED,
     extras_require=EXTRAS,
     include_package_data=True,
-    license='All rights reserved',
+    license="All rights reserved",
     classifiers=[
         # Trove classifiers
         # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.11',
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.11",
     ],
     entry_points={
         #     'console_scripts': ['mycli=mymodule:cli'],
     },
-
     # scripts=['bin/funny-joke.sh'],
     # $ setup.py publish support.
-    cmdclass={
-        'clear': CleanCommand,
-        'publish': PublishCommand
-    },
+    cmdclass={"clear": CleanCommand, "publish": PublishCommand},
 )
