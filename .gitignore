@@ -25,6 +25,7 @@ sonar-project.properties
 
 .venv
 .env
+.ruff_cache/
 
 *.ipynb_checkpoints
 
