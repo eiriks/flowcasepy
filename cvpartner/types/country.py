@@ -41,7 +41,6 @@ class Country(BaseModel):
 #     __root__: List[ModelItem]
 
 
-
 class Countries(RootModel):
     '''Root model for countries'''
     root: List[Country]
