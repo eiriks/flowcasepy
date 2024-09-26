@@ -16,7 +16,7 @@ This can be used to scrape out all user CVs from the api:
 import os
 from cvpartner import CVPartner
 
-cvp = CVPartner(org='myorg', api_key=os.environ['CVPARTNER_API_KEY'])
+cvp = CVPartner(org="myorg", api_key=os.environ["CVPARTNER_API_KEY"])
 
 ```
 
@@ -27,9 +27,9 @@ from IPython.display import HTML, display
 from cvpartner.types.search_result import SearchItem
 
 # Find a CV to work on:
-results = cvp.search_users(query='Rufus Scrimgeour')
+results = cvp.search_users(query="Rufus Scrimgeour")
 
-print(f'{len(results)} users found')
+print(f"{len(results)} users found")
 table=[["name", "user_id", "cv_id"]]
 for user in results:
     user: SearchItem
@@ -37,22 +37,22 @@ for user in results:
     table.append([user.name, user.user_id, user.default_cv_id])
 
 display(HTML(
-    '<table><tr>{}</tr></table>'.format(
-        '</tr><tr>'.join(
-            '<td>{}</td>'.format('</td><td>'.join(str(_) for _ in row)) for row in table)
+    "<table><tr>{}</tr></table>".format(
+        "</tr><tr>".join(
+            "<td>{}</td>".format("</td><td>".join(str(_) for _ in row)) for row in table)
     )
 ))
 ```
 
 Retrieve a spesific CV.
 ```python
-user_cv = cvp.get_user_cv(user_id='5a16db...b862',
-                          cv_id='5a1...eb863')
+user_cv = cvp.get_user_cv(user_id="5a16db...b862",
+                          cv_id="5a1...eb863")
 ```
 
 Retrieve a full department:
 ```python
-DEPARTMENT_NAME = 'Department of Magical Accidents and Catastrophes'
+DEPARTMENT_NAME = "Department of Magical Accidents and Catastrophes"
 
 department = cvp.get_emploees_and_cvs_from_department(DEPARTMENT_NAME)
 ```
