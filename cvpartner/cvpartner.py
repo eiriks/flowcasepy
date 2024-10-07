@@ -2,21 +2,21 @@
 # -*- coding: utf-8 -*-
 
 # std lib
+import datetime
 import logging
+import time
 from typing import List, Optional
 
-from cvpartner.types.cv import CVResponse
+# 3rd party
+import pydantic
+import requests
+
 from cvpartner.types.country import Countries, Office
 from cvpartner.types.customer import Customers
+from cvpartner.types.cv import CVResponse
 from cvpartner.types.department import Department
-from cvpartner.types.employee import EmployeeSearchResult, Employee
+from cvpartner.types.employee import Employee, EmployeeSearchResult
 from cvpartner.types.search_result import SearchResults
-
-
-# 3rd party
-import requests
-import pydantic
-
 
 # URLs
 USERS_URL_BASE = "https://{org}.cvpartner.com/api/v1/users?offset={offset}"
@@ -33,6 +33,8 @@ COUNTRIES = "https://{org}.cvpartner.com/api/v1/countries"
 URL_CUSTOMER_SEARCH = "https://{org}.cvpartner.com/api/v2/company/cv/customers?customer_name={customer_name}&size={size}&offset={offset}"
 URL_CUSTOMER = "https://{org}.cvpartner.com/api/v2/company/cv/customers/{customer_id}/projects/{project_id}"
 
+# reference reports
+URL_REFERENCE_REPORTS = "https://{org}.cvpartner.com/api/v4/references/reports"
 
 # logger
 log = logging.getLogger(__name__)
@@ -72,7 +74,7 @@ class CVPartner:
 
     def get_emploees_by_department(
         self, office_name: str = "Data Engineering", size=100
-    ) -> Optional[List[Employee]]:
+    ) -> List[Employee]:
         # find office ID from name
         offices = self.list_offices_from_country()
         # filter down to only the match, if any
@@ -197,3 +199,78 @@ class CVPartner:
         countries: Countries = self.list_countries()
         offices = [c.offices for c in countries.root if c.code == country_code][0]
         return offices
+
+    # referance case reports
+    # Step 1: Initiate Report Request
+    def initiate_report(self) -> str:
+        request_data = {
+            "offset": 0,
+            "size": 100,
+            "must": [],
+            "workflow_stage_filter": "live",
+            "filter_owned": False,
+            "output_format": "xlsx",
+        }
+        # print(self._auth_header)
+        # print(request_data)
+        url = URL_REFERENCE_REPORTS.format(org=self.org)
+        response = requests.post(url, data=request_data, headers=self._auth_header)
+        if response.status_code == 200:
+            return response.json()["id"]  # ["_id"]
+        else:
+            raise Exception(f"Failed to initiate report: {response.status_code}")
+
+    # Trinn 2: Polle for å sjekke om rapporten er ferdig
+    def poll_report_status(self, report_id: str) -> str:
+        url = f"{URL_REFERENCE_REPORTS.format(org=self.org)}/{report_id}"
+        print(url)
+
+        while True:
+            response = requests.get(url, headers=self._auth_header)
+            report_data = response.json()
+
+            percent_processed = report_data.get("percentProcessed", 0)
+            state = report_data.get("status", "started")
+
+            print(f"Report processing: {percent_processed}%")
+
+            if state == "finished":
+                file_url = report_data.get("file").get("url")
+                if file_url:
+                    print("Report is finished!")
+                    return file_url
+                else:
+                    raise Exception("Report finished, but no file URL found.")
+            print(report_data)
+            print("Waiting 5s for report to finish...")
+            time.sleep(5)  # Vente 5 sekunder før neste polling
+
+    # Trinn 3: Last ned rapportfilen fra den signerte URL-en
+    def download_report_file(self, file_url, output_path):
+        response = requests.get(file_url)
+
+        if response.status_code == 200:
+            with open(output_path, "wb") as f:
+                f.write(response.content)
+            print(f"Report downloaded successfully: {output_path}")
+        else:
+            raise Exception(
+                f"Error downloading file: {response.status_code}, {response.text}"
+            )
+
+    # fiannlay do all the things
+    # get todays year as YYYY and month as MM and day as DD in a string
+
+    def get_reference_report(self, output_filename: Optional[str] = None) -> str:
+        report_id = self.initiate_report()
+        file_url = self.poll_report_status(report_id)
+
+        # make a filename with todays date
+        today = datetime.datetime.now().strftime("%Y-%m-%d")
+        if not output_filename:
+            output_filename = f"reference_report_{today}.xlsx"
+        else:
+            output_filename = f"{output_filename}_{today}.xlsx"
+
+        self.download_report_file(file_url, output_filename)
+        return output_filename

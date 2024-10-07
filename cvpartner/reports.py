@@ -278,7 +278,7 @@ def get_year_in_review(
     )
 
 
-def print_new_items_on_cv(cv: CVResponse, days_to_look_back: int =365) -> None:
+def print_new_items_on_cv(cv: CVResponse, days_to_look_back: int = 365) -> None:
     """
     Prints the new items on a CV within a specified number of days.
 
