@@ -3,13 +3,12 @@
 
 import networkx as nx
 
-from cvpartner.helpers import get_role_from_cv_roles, get_tags_from_cv
-from cvpartner.helpers import clean_name
+from cvpartner.helpers import clean_name, get_role_from_cv_roles, get_tags_from_cv
 
 
 def create_person_node(user: dict) -> tuple[str, dict]:
     return (
-        clean_name(user.get("name")),
+        clean_name(user.get("name", "no name")),
         {
             "type": "person",
             "role": user.get("role"),

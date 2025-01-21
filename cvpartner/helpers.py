@@ -1,8 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import datetime
+import logging
+import re
+from datetime import date
+from typing import Optional
+
 from cvpartner.types.cv import (
+    Certification,
     Course,
+    CVResponse,
     Education,
     HonorsAward,
     Position,
@@ -10,15 +18,6 @@ from cvpartner.types.cv import (
     ProjectExperienceExpanded,
     WorkExperience,
 )
-import re
-import logging
-import datetime
-from datetime import date
-from typing import Optional
-
-
-from cvpartner.types.cv import ProjectExperience
-from cvpartner.types.cv import CVResponse, Certification
 from cvpartner.types.department import Department
 from cvpartner.types.employee import Employee
 
@@ -29,7 +28,7 @@ logger = logging.getLogger(__name__)
 # grab date parts from project
 # put together a proper python date
 def create_dates_from_project(
-    project: ProjectExperience,
+    project: ProjectExperienceExpanded,
 ) -> tuple[datetime.datetime, datetime.datetime | None, int]:
     """Function to make a best guess at the start and end dates of a project."""
     month_from = int(project.month_from) if project.month_from else 1
@@ -59,6 +58,11 @@ def sort_projects(
 ) -> list[tuple[datetime.datetime, datetime.datetime | None, int, dict]]:
     """Sort projects by date, newest first or oldest first."""
     projects_to_sort = []
+
+    # gard against empty cv
+    if cv.project_experiences is None:
+        return projects_to_sort
+
     for project in cv.project_experiences:
         date_from, date_to, delta_monts = create_dates_from_project(project)
 
@@ -104,6 +108,10 @@ def get_new_projects(
     # - that is new-ish, but still not ended, assmuing an ongoing project
 
     new_projects: list[ProjectExperienceExpanded] = []
+
+    # guard against empty cv
+    if cv.project_experiences is None:
+        return new_projects
 
     for project in cv.project_experiences:
         # started last year
@@ -158,6 +166,11 @@ def get_new_courses(
     cv: CVResponse, days_to_look_back: int = 365, language: str = "no"
 ) -> list[Course]:
     new_courses: list[Course] = []
+
+    # gard against empty cv
+    if cv.courses is None:
+        return new_courses
+
     for course in cv.courses:
         if not course.year:
             logger.warning(
@@ -190,6 +203,11 @@ def get_new_certification(
     cv: CVResponse, days_to_look_back: int = 365, language: str = "no"
 ) -> list[Certification]:
     new_certifications: list[Certification] = []
+
+    # gaerd against empty cv
+    if cv.certifications is None:
+        return new_certifications
+
     for cert in cv.certifications:
         if not cert.year:
             logger.warning(
@@ -251,6 +269,11 @@ def get_new_honors_and_awards(
     cv: CVResponse, days_to_look_back: int = 365, language: str = "no"
 ) -> list[HonorsAward]:
     new_honors_and_awards: list[HonorsAward] = []
+
+    # gard against empty cv
+    if cv.honors_awards is None:
+        return new_honors_and_awards
+
     for honor in cv.honors_awards:
         if not honor.year:
             logger.warning(
@@ -312,6 +335,11 @@ def get_new_work_experiences(
     We mostly care about work done in current posistion.
     """
     new_work_experiences: list[WorkExperience] = []
+
+    # gard against empty cv
+    if cv.work_experiences is None:
+        return new_work_experiences
+
     for job in cv.work_experiences:
         if not job.year_from:
             logger.warning(
@@ -329,7 +357,7 @@ def get_new_work_experiences(
     return new_work_experiences
 
 
-def get_proper_project_dates(year: str | int, month: str | int, day: int = 1):
+def get_proper_project_dates(year: str | int, month: Optional[str | int], day: int = 1):
     month = int(month) if month else 1
     year = int(year)
     return datetime.datetime(year=year, month=month, day=day).astimezone()
@@ -339,6 +367,11 @@ def get_new_project_experiences(
     cv: CVResponse, days_to_look_back: int = 365, language: str = "no"
 ) -> list[ProjectExperienceExpanded]:
     new_project_experiences: list[ProjectExperienceExpanded] = []
+
+    # gard against empty cv
+    if cv.project_experiences is None:
+        return new_project_experiences
+
     for project in cv.project_experiences:
         if not project.year_from:
             logger.warning(
@@ -378,6 +411,11 @@ def get_old_project_experiences(
     cv: CVResponse, older_than_days: int = 365, language: str = "no"
 ) -> list[ProjectExperienceExpanded]:
     old_project_experiences: list[ProjectExperienceExpanded] = []
+
+    # gard against empty cv
+    if cv.project_experiences is None:
+        return old_project_experiences
+
     for project in cv.project_experiences:
         if not project.year_from:
             logger.warning(
@@ -430,55 +468,58 @@ def get_new_educations(cv, days_to_look_back=365):
 def get_degree_candidates(degree: Optional[str]) -> str:
     """Function to return a standard name for a degree, from a user input string."""
 
-    if degree:
-        degree = degree.lower()
-        if any(deg in degree for deg in ["phd", "ph.d.", "doktor", "doctor"]):
-            return "phd"
-        if any(
-            deg in degree
-            for deg in [
-                "master",
-                "m.a.",
-                "m.s.",
-                "siviløkonom",
-                "sivilingeniør",
-                "cand scient",
-                "cand.scient.",
-                "cand.mag.",
-                "cand-mag",
-                "m. sc",
-                "m.sc.",
-            ]
-        ):
-            return "master"
-        if any(
-            deg in degree
-            for deg in [
-                "b.a.",
-                "bs",
-                "ba",
-                "bachelor",
-                "b.sc.",
-                "b.sc",
-                "ingeniør",
-                "3 year it education",
-            ]
-        ):
-            return "bachelor"
-    # 'Høyskolekandidat i programmering'
-    # that is two years. not a BA/BS
+    phd_spellings = ["phd", "ph.d.", "doktor", "doctor"]
+    master_spellings = [
+        "master",
+        "m.a.",
+        "m.s.",
+        "siviløkonom",
+        "sivilingeniør",
+        "cand scient",
+        "cand.scient.",
+        "cand.mag.",
+        "cand-mag",
+        "m. sc",
+        "m.sc.",
+    ]
+    bachelor_spellings = [
+        "b.a.",
+        "bs",
+        "ba",
+        "bachelor",
+        "b.sc.",
+        "b.sc",
+        "ingeniør",
+        "3 year it education",
+    ]
+
+    if not degree:
+        return "no degree"
+    degree = degree.lower()
+    if any(deg in degree for deg in phd_spellings):
+        return "phd"
+    if any(deg in degree for deg in master_spellings):
+        return "master"
+    if any(deg in degree for deg in bachelor_spellings):
+        return "bachelor"
+    return "unknown"
 
 
-def get_highest_degree(cv: CVResponse) -> Optional[str]:
+# 'Høyskolekandidat i programmering'
+# that is two years. not a BA/BS
+# fallback to unknown
+
+
+def get_highest_degree(cv: CVResponse) -> str:
     # sample candidate degrees: phd, master, bachelor
     canditate_top_degrees = []
+    if cv.educations:
+        for edu in cv.educations:
+            if not edu.year_to or not edu.year_to.strip().isnumeric():
+                # skip unfinnished education
+                continue
 
-    for edu in cv.educations:
-        if not edu.year_to or not edu.year_to.strip().isnumeric():
-            # skip unfinnished education
-            continue
-
-        canditate_top_degrees.append(get_degree_candidates(edu.degree.no))
+            canditate_top_degrees.append(get_degree_candidates(edu.degree.no))
 
     # resolve
     if "phd" in canditate_top_degrees:
@@ -492,10 +533,9 @@ def get_highest_degree(cv: CVResponse) -> Optional[str]:
 
 
 def get_email(person: Employee, convert_to_lowercase: bool = True) -> Optional[str]:
-    if convert_to_lowercase:
-        return person.email.lower()
-    else:
-        return person.email
+    if person.email is None:
+        return None
+    return person.email.lower() if convert_to_lowercase else person.email
 
 
 def get_graduation_year(cv) -> Optional[int]:
@@ -527,7 +567,7 @@ def add_space_around_slash(string: str) -> str:
     return string.replace("/", " / ")
 
 
-def clean_name(name: str) -> Optional[str]:
+def clean_name(name: str) -> str:
     # guard
     if not name:
         return name
@@ -565,7 +605,10 @@ def rename_common_variations_in_dev(string) -> str:
 
 
 def get_role_from_cv_roles(cv_role: dict, lang: str = "no") -> str | None:
-    tmp_role_string = cv_role.get("name").get(lang)
+    tmp_role_string = cv_role.get("name", {}).get(lang)
+    if not tmp_role_string:
+        return None
+
     if tmp_role_string:
         tmp_role_string = tmp_role_string.replace("-", " ")
         tmp_role_string = remove_ending_period(tmp_role_string)

@@ -27,9 +27,7 @@ from cvpartner.types.employee import Employee
 logger = logging.getLogger(__name__)
 
 
-def print_people_with_older_unclosed_projects(
-    department: Department,
-) -> list[tuple[Employee, dict]]:
+def print_people_with_older_unclosed_projects(department: Department) -> None:
     """Get all users with older unclosed projects
 
     Args:
@@ -40,7 +38,7 @@ def print_people_with_older_unclosed_projects(
     """
 
     users_with_older_unclosed_projects = []
-    for user, cv in department.__root__:
+    for user, cv in department:
         user: Employee
         cv: CVResponse
 
@@ -139,7 +137,7 @@ def print_people_with_new_courses(
 
 
 def get_people_with_new_certifications(
-    department: Department, days_to_look_back=365
+    department: Department, days_to_look_back=365, verbose: bool = False
 ) -> dict[str, list[Certification]]:
     # print("Looking for new certifications...")
 
@@ -150,8 +148,8 @@ def get_people_with_new_certifications(
         new_certs = get_new_certification(cv, days_to_look_back=days_to_look_back)
         if new_certs:
             new_certifications[cv.navn] = new_certs
-
-    print(f"{len(new_certifications)} people with new certifications found")
+    if verbose:
+        print(f"{len(new_certifications)} people with new certifications found")
     return new_certifications
 
 
@@ -230,7 +228,7 @@ def print_people_with_new_honors_and_awards(
 def get_skills_keyword(
     project_experience_skills: List[ProjectExperienceSkill],
 ) -> list[str]:
-    return [skill.tags.no for skill in project_experience_skills]
+    return [skill.tags.no for skill in project_experience_skills if skill.tags.no]
 
 
 def get_year_in_review(

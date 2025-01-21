@@ -86,8 +86,8 @@ class Customer(BaseModel):
 
 
 class Customers(BaseModel):
-    def __len__(self):
-        return len(self.customers)
-
     customers: List[Customer]
     total: int
+
+    def __len__(self):
+        return len(self.customers)

@@ -19,22 +19,19 @@ from cvpartner.types.employee import Employee, EmployeeSearchResult
 from cvpartner.types.search_result import SearchResults
 
 # URLs
-USERS_URL_BASE = "https://{org}.cvpartner.com/api/v1/users?offset={offset}"
-USERS_URL_BASE_SEARCH = (
+USERS_API_V2_SEARCH_URL = (
     "https://{org}.cvpartner.com/api/v2/users/search?deactivated=false&name={name}"
 )
-USERS_URL_BASE_SEARCH_V4 = "https://{org}.cvpartner.com/api/v4/search"
+USERS_API_V4_SEARCH_URL = "https://{org}.cvpartner.com/api/v4/search"
 
-CV_URL_BASE = "https://{org}.cvpartner.com/api/v3/cvs/{user_id}/{cv_id}"
+CV_API_V3_URL_BASE = "https://{org}.cvpartner.com/api/v3/cvs/{user_id}/{cv_id}"
 
-COUNTRIES = "https://{org}.cvpartner.com/api/v1/countries"
+COUNTRIES_API_V1_URL = "https://{org}.cvpartner.com/api/v1/countries"
 
-# Not sure I even need these..
-URL_CUSTOMER_SEARCH = "https://{org}.cvpartner.com/api/v2/company/cv/customers?customer_name={customer_name}&size={size}&offset={offset}"
-URL_CUSTOMER = "https://{org}.cvpartner.com/api/v2/company/cv/customers/{customer_id}/projects/{project_id}"
+CUSTOMER_API_V2_SEARCH_URL = "https://{org}.cvpartner.com/api/v2/company/cv/customers?customer_name={customer_name}&size={size}&offset={offset}"
+CUSTOMER_API_V2_URL = "https://{org}.cvpartner.com/api/v2/company/cv/customers/{customer_id}/projects/{project_id}"
 
-# reference reports
-URL_REFERENCE_REPORTS = "https://{org}.cvpartner.com/api/v4/references/reports"
+REFERENCE_REPORTS_API_V4_URL = "https://{org}.cvpartner.com/api/v4/references/reports"
 
 # logger
 log = logging.getLogger(__name__)
@@ -55,7 +52,7 @@ class CVPartner:
         """If True, print debug messages to stdout."""
 
     def get_customers_by_name(self, customer_name: str, size=10, offset=0) -> Customers:
-        url = URL_CUSTOMER_SEARCH.format(
+        url = CUSTOMER_API_V2_SEARCH_URL.format(
             org=self.org, customer_name=customer_name, size=size, offset=offset
         )
         r = requests.get(url, headers=self._auth_header)
@@ -85,7 +82,7 @@ class CVPartner:
             log.warning(f"No office found with name {office_name}!")
             return []
         # do a "search" for users in that office
-        url = USERS_URL_BASE_SEARCH_V4.format(org=self.org)
+        url = USERS_API_V4_SEARCH_URL.format(org=self.org)
 
         params = {
             "office_ids": [office_id],
@@ -115,7 +112,7 @@ class CVPartner:
 
     def get_emploees_and_cvs_from_department(
         self, office_name: str = "Data Engineering", size=100
-    ) -> Department | None:
+    ) -> Department:
         # this fails by returning 100, it should be limited to size of department...
         # TODO: fix this
 
@@ -136,7 +133,7 @@ class CVPartner:
 
     def search_users(self, query: str, only_norway=True) -> SearchResults:
         log.debug(f"Retreiving user {query} from API...")
-        search_url = USERS_URL_BASE_SEARCH.format(org=self.org, name=query)
+        search_url = USERS_API_V2_SEARCH_URL.format(org=self.org, name=query)
 
         if only_norway:
             offices_url = ""
@@ -161,7 +158,7 @@ class CVPartner:
 
     def get_user_cv(self, user_id: str, cv_id: str) -> CVResponse:
         log.debug(f"Retreiving user {user_id} CV {cv_id} from API...")
-        cv_url = CV_URL_BASE.format(org=self.org, user_id=user_id, cv_id=cv_id)
+        cv_url = CV_API_V3_URL_BASE.format(org=self.org, user_id=user_id, cv_id=cv_id)
         r = requests.get(cv_url, headers=self._auth_header)
         try:
             cv_data = r.json()
@@ -180,7 +177,7 @@ class CVPartner:
 
     def list_countries(self) -> Countries:
         """Lists the countries in the organization."""
-        url = COUNTRIES.format(org=self.org)
+        url = COUNTRIES_API_V1_URL.format(org=self.org)
         r = requests.get(url, headers=self._auth_header)
         try:
             data = r.json()
@@ -213,17 +210,18 @@ class CVPartner:
         }
         # print(self._auth_header)
         # print(request_data)
-        url = URL_REFERENCE_REPORTS.format(org=self.org)
+        url = REFERENCE_REPORTS_API_V4_URL.format(org=self.org)
         response = requests.post(url, data=request_data, headers=self._auth_header)
         if response.status_code == 200:
             return response.json()["id"]  # ["_id"]
         else:
             raise Exception(f"Failed to initiate report: {response.status_code}")
 
-    # Trinn 2: Polle for å sjekke om rapporten er ferdig
-    def poll_report_status(self, report_id: str) -> str:
-        url = f"{URL_REFERENCE_REPORTS.format(org=self.org)}/{report_id}"
-        print(url)
+    # Trinn 2: Pulle for å sjekke om rapporten er ferdig
+    def pull_report_status(self, report_id: str) -> str:
+        """Pull to check if the report is finished."""
+        url = f"{REFERENCE_REPORTS_API_V4_URL.format(org=self.org)}/{report_id}"
+        log.debug(f"Polling report status at {url}")
 
         while True:
             response = requests.get(url, headers=self._auth_header)
@@ -232,18 +230,18 @@ class CVPartner:
             percent_processed = report_data.get("percentProcessed", 0)
             state = report_data.get("status", "started")
 
-            print(f"Report processing: {percent_processed}%")
+            log.debug(f"Report processing: {percent_processed}%")
 
             if state == "finished":
                 file_url = report_data.get("file").get("url")
                 if file_url:
-                    print("Report is finished!")
+                    log.debug("Report is finished!")
                     return file_url
                 else:
                     raise Exception("Report finished, but no file URL found.")
-            print(report_data)
-            print("Waiting 5s for report to finish...")
-            time.sleep(5)  # Vente 5 sekunder før neste polling
+            log.debug(report_data)
+            log.debug("Waiting 5s for report to finish...")
+            time.sleep(5)  # Wait 5 seconds before next polling
 
     # Trinn 3: Last ned rapportfilen fra den signerte URL-en
     def download_report_file(self, file_url, output_path):
@@ -263,7 +261,7 @@ class CVPartner:
 
     def get_reference_report(self, output_filename: Optional[str] = None) -> str:
         report_id = self.initiate_report()
-        file_url = self.poll_report_status(report_id)
+        file_url = self.pull_report_status(report_id)
 
         # make a filename with todays date
         today = datetime.datetime.now().strftime("%Y-%m-%d")
