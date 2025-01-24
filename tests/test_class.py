@@ -78,9 +78,9 @@ def test_get_role_from_cv_roles_with_slash():
     assert get_role_from_cv_roles(cv_role) == "Tech Lead / Utvikler"
 
 
-def test_get_role_from_cv_roles_empty_string():
+def test_get_role_from_cv_roles_empty_is_none():
     cv_role = {"name": {"no": ""}}
-    assert get_role_from_cv_roles(cv_role) == ""
+    assert get_role_from_cv_roles(cv_role) is None
 
 
 def test_get_role_from_cv_roles_none():

@@ -10,6 +10,7 @@ from typing import List, Optional
 # 3rd party
 import pydantic
 import requests
+from pydantic import ValidationError
 
 from cvpartner.types.country import Countries, Office
 from cvpartner.types.customer import Customers
@@ -26,12 +27,16 @@ USERS_API_V4_SEARCH_URL = "https://{org}.cvpartner.com/api/v4/search"
 
 CV_API_V3_URL_BASE = "https://{org}.cvpartner.com/api/v3/cvs/{user_id}/{cv_id}"
 
-COUNTRIES_API_V1_URL = "https://{org}.cvpartner.com/api/v1/countries"
+# COUNTRIES_API_V1_URL = "https://{org}.cvpartner.com/api/v1/countries"
+COUNTRIES_API_V1_URL = (
+    "https://{org}.flowcase.com/api/v1/countries?use_legacy_codes=false"
+)
 
 CUSTOMER_API_V2_SEARCH_URL = "https://{org}.cvpartner.com/api/v2/company/cv/customers?customer_name={customer_name}&size={size}&offset={offset}"
 CUSTOMER_API_V2_URL = "https://{org}.cvpartner.com/api/v2/company/cv/customers/{customer_id}/projects/{project_id}"
 
 REFERENCE_REPORTS_API_V4_URL = "https://{org}.cvpartner.com/api/v4/references/reports"
+
 
 # logger
 log = logging.getLogger(__name__)
@@ -181,15 +186,15 @@ class CVPartner:
         r = requests.get(url, headers=self._auth_header)
         try:
             data = r.json()
-        except requests.exceptions.JSONDecodeError:
+        except requests.exceptions.JSONDecodeError as e:
             print(self.ERROR_MESSAGE_DECODE + r.text)
-            raise
+            raise ValueError(f"{self.ERROR_MESSAGE_DECODE}{r.text}") from e
 
         try:
             return Countries.model_validate(data)
-        except pydantic.ValidationError:
+        except pydantic.ValidationError as e:
             print(self.ERROR_MESSAGE_PARSE + r.text)
-            raise
+            raise ValidationError(f"{self.ERROR_MESSAGE_PARSE}{r.text}") from e
 
     def list_offices_from_country(self, country_code: str = "no") -> list[Office]:
         """return name and Id of offices, aka departments"""
