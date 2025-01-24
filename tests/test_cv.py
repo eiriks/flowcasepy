@@ -3,12 +3,15 @@ import json
 import os
 
 import pytest
+from dotenv import load_dotenv
 
-from cvpartner import CVPartner
-from cvpartner.helpers import get_days_since_last_finished_project
-from cvpartner.types.country import Countries
-from cvpartner.types.cv import CVResponse
-from cvpartner.types.department import Department
+from flowcase import Flowcase
+from flowcase.helpers import get_days_since_last_finished_project
+from flowcase.types.country import Countries
+from flowcase.types.cv import CVResponse
+from flowcase.types.department import Department
+
+load_dotenv()
 
 # get department with cvs
 department_with_cv = json.loads(open("tests/data/department_with_cvs.json").read())
@@ -72,7 +75,7 @@ def test_get_days_since_last_finished_project(project, expected_days):
 
 @pytest.fixture
 def cv_partner():
-    return CVPartner(org="noaignite", api_key=os.environ["CVPARTNER_API_KEY"])
+    return Flowcase(org="noaignite", api_key=os.environ["FLOWCASE_API_KEY"])
 
 
 def test_get_employees_by_department(cv_partner):

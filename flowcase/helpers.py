@@ -7,7 +7,7 @@ import re
 from datetime import date
 from typing import Optional
 
-from cvpartner.types.cv import (
+from flowcase.types.cv import (
     Certification,
     Course,
     CVResponse,
@@ -18,8 +18,8 @@ from cvpartner.types.cv import (
     ProjectExperienceExpanded,
     WorkExperience,
 )
-from cvpartner.types.department import Department
-from cvpartner.types.employee import Employee
+from flowcase.types.department import Department
+from flowcase.types.employee import Employee
 
 # set up logging to std out
 logger = logging.getLogger(__name__)
@@ -542,7 +542,7 @@ def get_graduation_year(cv) -> Optional[int]:
     """Get the finnal year of the last compleated education
 
     Args:
-        cv (dict): CVpartner cv object
+        cv (dict): Flowcase object
 
     Returns:
         Optional[int]: the year as int (eg 2008) or None
@@ -624,7 +624,11 @@ def get_role_from_cv_roles(cv_role: dict, lang: str = "no") -> str | None:
 
 def get_tags_from_cv(cv: dict, lang: str = "no") -> list[str]:
     tags = []
-    for technology in cv.get("technologies"):
+    technologies = cv.get("technologies")
+    if not technologies:
+        return tags  # skip empty tags
+
+    for technology in technologies:
         # these come in groups
         if technology.get("technology_skills"):
             for group in technology.get("technology_skills"):
@@ -638,6 +642,8 @@ def get_keywords_from_projects(projects: list[ProjectExperienceExpanded]) -> lis
     words = []
     for project in projects:
         project: ProjectExperienceExpanded
+        if not project.project_experience_skills:
+            continue  # skip empty project
         for skills in project.project_experience_skills:
             if skills.tags.no:
                 words.append(skills.tags.no)

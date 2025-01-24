@@ -4,14 +4,17 @@ from unittest.mock import patch
 
 import pytest
 import requests_mock
+from dotenv import load_dotenv
 
-from cvpartner import CVPartner
-from cvpartner.types.country import Countries
+from flowcase import Flowcase
+from flowcase.types.country import Countries
+
+load_dotenv()
 
 
 @pytest.fixture
 def cv_partner():
-    return CVPartner(org="noaignite", api_key=os.environ["CVPARTNER_API_KEY"])
+    return Flowcase(org="noaignite", api_key=os.environ["FLOWCASE_API_KEY"])
 
 
 @pytest.fixture
@@ -92,7 +95,7 @@ def test_initiate_report_success(cv_partner):
     # Mock the requests library to return a successful response
     with requests_mock.Mocker() as m:
         m.post(
-            re.compile(r"https://.*\.cvpartner\.com/api/v4/references/reports"),
+            re.compile(r"https://.*\.flowcase\.com/api/v4/references/reports"),
             json={"id": "report123"},
             status_code=200,
         )
@@ -108,7 +111,7 @@ def test_initiate_report_failure(cv_partner):
     # Mock the requests library to return an error response
     with requests_mock.Mocker() as m:
         m.post(
-            re.compile(r"https://.*\.cvpartner\.com/api/v4/references/reports"),
+            re.compile(r"https://.*\.flowcase\.com/api/v4/references/reports"),
             json={"error": "Invalid request"},
             status_code=400,
         )

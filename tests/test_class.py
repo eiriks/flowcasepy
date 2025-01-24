@@ -2,16 +2,19 @@ import os
 from datetime import datetime
 
 import pytest
+from dotenv import load_dotenv
 
-from cvpartner import CVPartner
-from cvpartner.helpers import get_age, get_role_from_cv_roles
-from cvpartner.types.cv import CVResponse
-from cvpartner.types.employee import Employee
+from flowcase import Flowcase
+from flowcase.helpers import get_age, get_role_from_cv_roles
+from flowcase.types.cv import CVResponse
+from flowcase.types.employee import Employee
+
+load_dotenv()
 
 
 @pytest.fixture
 def cv_partner():
-    return CVPartner(org="noaignite", api_key=os.environ["CVPARTNER_API_KEY"])
+    return Flowcase(org="noaignite", api_key=os.environ["FLOWCASE_API_KEY"])
 
 
 def test_class_instanciation_using_fixture(cv_partner):

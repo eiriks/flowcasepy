@@ -2,7 +2,7 @@
 import logging
 from typing import Dict, List
 
-from cvpartner.helpers import (
+from flowcase.helpers import (
     get_new_certification,
     get_new_courses,
     get_new_honors_and_awards,
@@ -11,7 +11,7 @@ from cvpartner.helpers import (
     get_new_projects,
     sort_projects,
 )
-from cvpartner.types.cv import (
+from flowcase.types.cv import (
     Certification,
     Course,
     CVResponse,
@@ -21,8 +21,8 @@ from cvpartner.types.cv import (
     ProjectExperienceExpanded,
     ProjectExperienceSkill,
 )
-from cvpartner.types.department import Department
-from cvpartner.types.employee import Employee
+from flowcase.types.department import Department
+from flowcase.types.employee import Employee
 
 logger = logging.getLogger(__name__)
 
@@ -156,7 +156,7 @@ def get_people_with_new_certifications(
 def print_people_who_might_have_forgotten_to_put_current_work_on_cv(
     department: Department, months_to_look_back: int = 3
 ) -> None:
-    from cvpartner.helpers import newest_project_is_older_than_n_months
+    from flowcase.helpers import newest_project_is_older_than_n_months
 
     print("Looking for people who might have forgotten to put current work on CV...")
     for _, cv in department.root[:]:

@@ -1,15 +1,19 @@
 import os
 
 import pytest
+from dotenv import load_dotenv
 
-from cvpartner import CVPartner
+from flowcase import Flowcase
 
-# from cvpartner.reports import get_value_additions_last_period
+# from flowcase.reports import get_value_additions_last_period
+
+
+load_dotenv()
 
 
 @pytest.fixture
 def cv_partner():
-    return CVPartner(org="noaignite", api_key=os.environ["CVPARTNER_API_KEY"])
+    return Flowcase(org="noaignite", api_key=os.environ["FLOWCASE_API_KEY"])
 
 
 def test_get_value_additions_last_period(cv_partner):

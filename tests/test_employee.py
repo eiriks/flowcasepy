@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from cvpartner.types.employee import Employee
+from flowcase.types.employee import Employee
 
 department = json.loads(open("tests/data/department.json").read())
 

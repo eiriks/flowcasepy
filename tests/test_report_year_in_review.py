@@ -1,15 +1,18 @@
 import os
 
 import pytest
+from dotenv import load_dotenv
 
-from cvpartner import CVPartner
-from cvpartner.make_slides import make_ppt_from_year_in_review
-from cvpartner.reports import get_year_in_review
+from flowcase import Flowcase
+from flowcase.make_slides import make_ppt_from_year_in_review
+from flowcase.reports import get_year_in_review
+
+load_dotenv()
 
 
 @pytest.fixture
 def cv_partner():
-    return CVPartner(org="noaignite", api_key=os.environ["CVPARTNER_API_KEY"])
+    return Flowcase(org="noaignite", api_key=os.environ["FLOWCASE_API_KEY"])
 
 
 @pytest.mark.skip(reason="TDD")
