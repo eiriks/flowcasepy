@@ -1,11 +1,11 @@
-## CVPartner scraper
+## Flowcase scraper
 
-This is a package for scraping the cvpartner api
+This is a package for scraping the flowcase api
 
 ### Getting started
 
-Install this fork of cvpartnerpy from this repo:
-`pip install git+https://github.com/eiriks/cvpartnerpy.git`
+Install this fork of flowcasepy from this repo:
+`pip install git+https://github.com/eiriks/flowcasepy.git`
 
 #### Usage
 
@@ -14,9 +14,11 @@ This can be used to scrape out all user CVs from the api:
 
 ```python
 import os
-from cvpartner import CVPartner
+from flowcase import Flowcase
 
-cvp = CVPartner(org="myorg", api_key=os.environ["CVPARTNER_API_KEY"])
+# load_dotenv() <- grab key
+
+cvp = Flowcase(org="myorg", api_key=os.environ["FLOWCASE_API_KEY"])
 
 ```
 
@@ -24,7 +26,7 @@ Search for single CV
 ```python
 
 from IPython.display import HTML, display
-from cvpartner.types.search_result import SearchItem
+from flowcase.types.search_result import SearchItem
 
 # Find a CV to work on:
 results = cvp.search_users(query="Rufus Scrimgeour")
@@ -63,8 +65,8 @@ pdoc was tested..
 I find the github workflow (.github/workflows/docs.yaml)
 
 ```
- pdoc cvpartner -o ./docs --logo "http..."
+ pdoc flowcase -o ./docs --logo "http..."
 ```
 But where does the generated html gets deployed?
 
-Oh.. here: https://eiriks.github.io/cvpartnerpy/cvpartner.html
+Oh.. here: https://eiriks.github.io/flowcasepy/...? cvpartner.html

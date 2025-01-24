@@ -1,9 +1,10 @@
 import os
 
 import pytest
+from dotenv import load_dotenv
 
-from cvpartner import CVPartner
-from cvpartner.helpers import (
+from flowcase import Flowcase
+from flowcase.helpers import (
     convert_developer_to_utvikler,
     convert_enginer_to_engineer,
     get_email,
@@ -14,12 +15,14 @@ from cvpartner.helpers import (
     remove_extra_whitespace,
     rename_common_variations_in_dev,
 )
-from cvpartner.types.search_result import SearchResults
+from flowcase.types.search_result import SearchResults
+
+load_dotenv()
 
 
 @pytest.fixture
 def cv_partner():
-    return CVPartner(org="noaignite", api_key=os.environ["CVPARTNER_API_KEY"])
+    return Flowcase(org="noaignite", api_key=os.environ["FLOWCASE_API_KEY"])
 
 
 def test_remove_extra_whitespace():

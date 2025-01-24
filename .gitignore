@@ -1,20 +1,19 @@
 sendgrid.env
 __pycache__/
 build/
-cvparterpy.egg-info/
-cvpartnerpy.egg-info/
 dist/
 old/
 tags
 user.ndjson
 users.ndjson
-test/
+#test/
 src.zip
 *.gexf
 *.pdf
 *.gephi
 exploring.ipynb
 .python-version
+
 
 sonar-project.properties
 .scannerwork/
@@ -31,6 +30,8 @@ sonar-project.properties
 
 presentation_*
 
+flowcasepy.egg-info
+
 /tests/data/*
 /tests/*.ipynb
 /tests/**/*.pptx
@@ -39,7 +40,9 @@ example_cv.json
 cvpartner/notebooks/
 cvpartner/notebooks/**/*.csv
 cvpartner/notebooks/kpi_results/
-
+flowcase/notebooks/
+flowcase/notebooks/**/*.csv
+/notebooks/kpi_results/
 
 .DS_Store
 .vscode/

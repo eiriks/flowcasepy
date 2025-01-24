@@ -3,7 +3,7 @@
 
 import networkx as nx
 
-from cvpartner.helpers import clean_name, get_role_from_cv_roles, get_tags_from_cv
+from flowcase.helpers import clean_name, get_role_from_cv_roles, get_tags_from_cv
 
 
 def create_person_node(user: dict) -> tuple[str, dict]:

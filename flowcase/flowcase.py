@@ -12,47 +12,47 @@ import pydantic
 import requests
 from pydantic import ValidationError
 
-from cvpartner.types.country import Countries, Office
-from cvpartner.types.customer import Customers
-from cvpartner.types.cv import CVResponse
-from cvpartner.types.department import Department
-from cvpartner.types.employee import Employee, EmployeeSearchResult
-from cvpartner.types.search_result import SearchResults
+from flowcase.types.country import Countries, Office
+from flowcase.types.customer import Customers
+from flowcase.types.cv import CVResponse
+from flowcase.types.department import Department
+from flowcase.types.employee import Employee, EmployeeSearchResult
+from flowcase.types.search_result import SearchResults
 
 # URLs
 USERS_API_V2_SEARCH_URL = (
-    "https://{org}.cvpartner.com/api/v2/users/search?deactivated=false&name={name}"
+    "https://{org}.flowcase.com/api/v2/users/search?deactivated=false&name={name}"
 )
-USERS_API_V4_SEARCH_URL = "https://{org}.cvpartner.com/api/v4/search"
+USERS_API_V4_SEARCH_URL = "https://{org}.flowcase.com/api/v4/search"
 
-CV_API_V3_URL_BASE = "https://{org}.cvpartner.com/api/v3/cvs/{user_id}/{cv_id}"
+CV_API_V3_URL_BASE = "https://{org}.flowcase.com/api/v3/cvs/{user_id}/{cv_id}"
 
 # COUNTRIES_API_V1_URL = "https://{org}.cvpartner.com/api/v1/countries"
 COUNTRIES_API_V1_URL = (
     "https://{org}.flowcase.com/api/v1/countries?use_legacy_codes=false"
 )
 
-CUSTOMER_API_V2_SEARCH_URL = "https://{org}.cvpartner.com/api/v2/company/cv/customers?customer_name={customer_name}&size={size}&offset={offset}"
-CUSTOMER_API_V2_URL = "https://{org}.cvpartner.com/api/v2/company/cv/customers/{customer_id}/projects/{project_id}"
+CUSTOMER_API_V2_SEARCH_URL = "https://{org}.flowcase.com/api/v2/company/cv/customers?customer_name={customer_name}&size={size}&offset={offset}"
+CUSTOMER_API_V2_URL = "https://{org}.flowcase.com/api/v2/company/cv/customers/{customer_id}/projects/{project_id}"
 
-REFERENCE_REPORTS_API_V4_URL = "https://{org}.cvpartner.com/api/v4/references/reports"
+REFERENCE_REPORTS_API_V4_URL = "https://{org}.flowcase.com/api/v4/references/reports"
 
 
 # logger
 log = logging.getLogger(__name__)
 
 
-class CVPartner:
-    """Class for interacting with CVPartner API. Docs for API at docs.cvpartner.com"""
+class Flowcase:
+    """Class for interacting with flowcase API. Docs for API at https://docs.flowcase.com/"""
 
-    ERROR_MESSAGE_DECODE = "Couldn't decode response from CVPartner:\n"
-    ERROR_MESSAGE_PARSE = "Couldn't parse response from CVPartner:\n"
+    ERROR_MESSAGE_DECODE = "Couldn't decode response from Flowcase:\n"
+    ERROR_MESSAGE_PARSE = "Couldn't parse response from Flowcase:\n"
 
     def __init__(self, org: str, api_key: str, verbose: bool = False):
-        """Set up the CVPartner API client."""
+        """Set up the Flowcase API client."""
         self._auth_header = {"Authorization": f'Token token="{api_key}"'}
         self.org = org
-        """Name of the organization in CVPartner. It's the subdomain in the URL."""
+        """Name of the organization in Flowcase. It's the subdomain in the URL."""
         self.verbose = verbose
         """If True, print debug messages to stdout."""
 

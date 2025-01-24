@@ -2,8 +2,8 @@ from typing import List, Tuple
 
 from pydantic import BaseModel
 
-from cvpartner.types.cv import CVResponse
-from cvpartner.types.employee import Employee
+from flowcase.types.cv import CVResponse
+from flowcase.types.employee import Employee
 
 
 # class Department(RootModel):

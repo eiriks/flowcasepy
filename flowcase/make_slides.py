@@ -1,20 +1,23 @@
 import datetime
 from typing import Dict, List
-from pptx.dml.color import RGBColor
-from pptx import Presentation as PP
-from cvpartner.reports import get_skills_keyword
 
-from cvpartner.types.cv import (
+from pptx import Presentation  # as PP
+from pptx.dml.color import RGBColor
+
+from flowcase.reports import get_skills_keyword
+from flowcase.types.cv import (
     Certification,
     Course,
     HonorsAward,
-    Presentation,
     ProjectExperienceExpanded,
+)
+from flowcase.types.cv import (
+    Presentation as CVPresentation,
 )
 
 
 def add_experience_slide(
-    prs: PP, layout, name: str, projects: List[ProjectExperienceExpanded]
+    prs: Presentation, layout, name: str, projects: List[ProjectExperienceExpanded]
 ):
     slide = prs.slides.add_slide(layout)
     slide.shapes.title.text = f"{name} 👷🏻‍♀️"
@@ -32,7 +35,11 @@ def add_experience_slide(
 
 
 def add_course_slide(
-    prs: PP, layout, name: str, courses: List[Course], background_color=(250, 233, 150)
+    prs: Presentation,
+    layout,
+    name: str,
+    courses: List[Course],
+    background_color=(250, 233, 150),
 ):
     slide = prs.slides.add_slide(layout)
     # set background color
@@ -53,7 +60,7 @@ def add_course_slide(
 
 
 def add_certification_slide(
-    prs: PP,
+    prs: Presentation,
     layout,
     name: str,
     certifications: List[Certification],
@@ -81,10 +88,10 @@ def add_certification_slide(
 
 
 def add_presentation_slide(
-    prs: PP,
+    prs: Presentation,
     layout,
     name: str,
-    presentations: List[Presentation],
+    presentations: List[CVPresentation],
     background_color=(150, 250, 237),
 ):
     slide = prs.slides.add_slide(layout)
@@ -109,7 +116,7 @@ def add_presentation_slide(
 
 
 def add_honors_and_awards_slide(
-    prs: PP,
+    prs: Presentation,
     layout,
     name: str,
     honors_and_awards: List[HonorsAward],
@@ -140,12 +147,12 @@ def make_ppt_from_year_in_review(
     projects_worked_on: Dict[str, list[ProjectExperienceExpanded]],
     new_courses: Dict[str, list[Course]],
     new_certifications: Dict[str, list[Certification]],
-    new_presentations: Dict[str, list[Presentation]],
+    new_presentations: Dict[str, list[CVPresentation]],
     new_honors_and_awards: Dict[str, list[HonorsAward]],
     department_name: str = "Data engineering",
 ) -> bool:
     try:
-        prs = PP()
+        prs = Presentation()
         title_slide_layout = prs.slide_layouts[0]
         slide = prs.slides.add_slide(title_slide_layout)
         title = slide.shapes.title
