@@ -26,6 +26,8 @@ sonar-project.properties
 .env
 .ruff_cache/
 
+uv.lock
+
 *.ipynb_checkpoints
 
 presentation_*
