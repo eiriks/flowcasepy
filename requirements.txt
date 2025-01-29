@@ -8,3 +8,4 @@ networkx==3.3
 ruff==0.6.4
 ipython==8.31.0
 python-dotenv==1.0.1
+lru-cache==0.2.3

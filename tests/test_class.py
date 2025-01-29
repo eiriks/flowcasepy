@@ -8,6 +8,7 @@ from flowcase import Flowcase
 from flowcase.helpers import get_age, get_role_from_cv_roles
 from flowcase.types.cv import CVResponse
 from flowcase.types.employee import Employee
+from flowcase.types.cv import TranslatedString
 
 load_dotenv()
 
@@ -52,7 +53,7 @@ def test_age():
         bruker_id="123",
         cv_roles=[],
         navn="Testing",
-        title={"no": "Konge"},
+        title=TranslatedString(no="Konge"),
     )
 
     assert get_age(cv) == 40

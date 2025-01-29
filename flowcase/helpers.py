@@ -5,7 +5,7 @@ import datetime
 import logging
 import re
 from datetime import date
-from typing import Optional
+from typing import List, Optional, Tuple
 
 from flowcase.types.cv import (
     Certification,
@@ -357,9 +357,15 @@ def get_new_work_experiences(
     return new_work_experiences
 
 
-def get_proper_project_dates(year: str | int, month: Optional[str | int], day: int = 1):
-    month = int(month) if month else 1
+def get_proper_project_dates(
+    year: str | int, month: Optional[str | int] = None, day: int = 1
+):
+    # print(f"year: {year}, month: {month}, day: {day}")
     year = int(year)
+    month = int(month) if month not in ("", None, 0, "0") else 1
+    if not (1 <= month <= 12):
+        raise ValueError("Month must be in range 1-12")
+    day = int(day) if day not in ("", None) else 1
     return datetime.datetime(year=year, month=month, day=day).astimezone()
 
 
@@ -669,3 +675,46 @@ def get_avg_new_keywords_pr_department(
         ture_new_skills = [skill for skill in new_skills if skill not in old_skills]
         new_skills_counter += len(ture_new_skills)
     return new_skills_counter / len(department.root)
+
+
+def get_new_certifications_from_department(
+    department: Department, months_back: int = 6
+) -> List[Tuple[str, Certification]]:
+    """Get new certifications from department members.
+
+    Args:
+        department: Department object containing members and their certifications
+        months_back: Number of months to look back for new certifications
+
+    Returns:
+        List of tuples with (person_name, certification) sorted by date
+    """
+    # cutoff_date = datetime.datetime.now() - timedelta(days=30 * months_back)
+    cutoff_date = get_proper_project_dates(
+        year=date.today().year, month=date.today().month - months_back
+    ).date()  # Convert to date
+    recent_certs = []
+
+    for person, cv in department:
+        if cv and cv.certifications:
+            for cert in cv.certifications:
+                cert: Certification
+                cert_date = get_proper_project_dates(year=cert.year, month=cert.month)
+
+                if cert_date:
+                    cert_date = cert_date.date()
+                    if cert_date > cutoff_date:
+                        recent_certs.append((person.name, cert))
+
+    # # Sort by date, newest first using get_proper_project_dates
+    # return sorted(
+    #     recent_certs, key=lambda x: get_proper_project_dates(x[1].date), reverse=True
+    # )
+    # Sort by date, newest first
+    return sorted(
+        recent_certs,
+        key=lambda x: get_proper_project_dates(year=x[1].year, month=x[1].month).date()
+        if get_proper_project_dates(year=x[1].year, month=x[1].month)
+        else date.min,
+        reverse=True,
+    )

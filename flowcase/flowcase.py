@@ -5,6 +5,7 @@
 import datetime
 import logging
 import time
+from functools import lru_cache
 from typing import List, Optional
 
 # 3rd party
@@ -56,24 +57,7 @@ class Flowcase:
         self.verbose = verbose
         """If True, print debug messages to stdout."""
 
-    def get_customers_by_name(self, customer_name: str, size=10, offset=0) -> Customers:
-        url = CUSTOMER_API_V2_SEARCH_URL.format(
-            org=self.org, customer_name=customer_name, size=size, offset=offset
-        )
-        r = requests.get(url, headers=self._auth_header)
-
-        try:
-            data = r.json()
-        except requests.exceptions.JSONDecodeError:
-            print(self.ERROR_MESSAGE_DECODE + r.text)
-            raise
-
-        try:
-            return Customers.model_validate(data)
-        except pydantic.ValidationError:
-            print(self.ERROR_MESSAGE_PARSE + r.text)
-            raise
-
+    @lru_cache(maxsize=1)
     def get_emploees_by_department(
         self, office_name: str = "Data Engineering", size=100
     ) -> List[Employee]:
@@ -115,6 +99,7 @@ class Flowcase:
             print(self.ERROR_MESSAGE_PARSE + r.text)
             raise
 
+    @lru_cache(maxsize=1)
     def get_emploees_and_cvs_from_department(
         self, office_name: str = "Data Engineering", size=100
     ) -> Department:
@@ -180,8 +165,13 @@ class Flowcase:
 
         return cv
 
+    @lru_cache(maxsize=1)  # cache the result, Countries class should be one result.
     def list_countries(self) -> Countries:
-        """Lists the countries in the organization."""
+        """Lists the countries in the organization.
+
+        The results are cached since this data rarely changes.
+        Use Flowcase.list_countries.cache_clear() to force a refresh.
+        """
         url = COUNTRIES_API_V1_URL.format(org=self.org)
         r = requests.get(url, headers=self._auth_header)
         try:
@@ -196,12 +186,49 @@ class Flowcase:
             print(self.ERROR_MESSAGE_PARSE + r.text)
             raise ValidationError(f"{self.ERROR_MESSAGE_PARSE}{r.text}") from e
 
+    @lru_cache(maxsize=1)  # cache the result, Countries class should be one result.
     def list_offices_from_country(self, country_code: str = "no") -> list[Office]:
-        """return name and Id of offices, aka departments"""
+        """return name and Id of offices, aka departments
+
+        The results are cached since this data rarely changes.
+        Use Flowcase.list_offices_from_country.cache_clear() to force a refresh.
+        """
         countries: Countries = self.list_countries()
         offices = [c.offices for c in countries.root if c.code == country_code][0]
         return offices
 
+    @lru_cache(maxsize=1)
+    def get_department_names(self, country_code: str = "no") -> List[str]:
+        """return name of offices, aka departments"""
+        offices = self.list_offices_from_country(country_code)
+        return [o.name for o in offices]
+
+    @lru_cache(maxsize=1)
+    def get_country_codes(self) -> List[str]:
+        """return country codes"""
+        countries = self.list_countries()
+        return [c.code for c in countries.root]
+
+    # this method is not used by anything? remove?
+    def get_customers_by_name(self, customer_name: str, size=10, offset=0) -> Customers:
+        url = CUSTOMER_API_V2_SEARCH_URL.format(
+            org=self.org, customer_name=customer_name, size=size, offset=offset
+        )
+        r = requests.get(url, headers=self._auth_header)
+
+        try:
+            data = r.json()
+        except requests.exceptions.JSONDecodeError:
+            print(self.ERROR_MESSAGE_DECODE + r.text)
+            raise
+
+        try:
+            return Customers.model_validate(data)
+        except pydantic.ValidationError:
+            print(self.ERROR_MESSAGE_PARSE + r.text)
+            raise
+
+    # REPORTS
     # referance case reports
     # Step 1: Initiate Report Request
     def initiate_report(self) -> str:
@@ -255,7 +282,8 @@ class Flowcase:
         if response.status_code == 200:
             with open(output_path, "wb") as f:
                 f.write(response.content)
-            print(f"Report downloaded successfully: {output_path}")
+            if self.verbose:
+                print(f"Report downloaded successfully: {output_path}")
         else:
             raise Exception(
                 f"Error downloading file: {response.status_code}, {response.text}"
