@@ -49,3 +49,5 @@ flowcase/notebooks/**/*.csv
 .DS_Store
 .vscode/
 *.xlsx
+
+.continue/

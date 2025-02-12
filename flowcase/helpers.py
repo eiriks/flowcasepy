@@ -4,7 +4,7 @@
 import datetime
 import logging
 import re
-from datetime import date
+from datetime import date, timedelta
 from typing import List, Optional, Tuple
 
 from flowcase.types.cv import (
@@ -493,6 +493,7 @@ def get_degree_candidates(degree: Optional[str]) -> str:
         "bs",
         "ba",
         "bachelor",
+        "(bachelor)",
         "b.sc.",
         "b.sc",
         "ingeniør",
@@ -689,9 +690,10 @@ def get_new_certifications_from_department(
     Returns:
         List of tuples with (person_name, certification) sorted by date
     """
-    # cutoff_date = datetime.datetime.now() - timedelta(days=30 * months_back)
+    cutoff_date_ = datetime.datetime.now() - timedelta(days=30 * months_back)
+
     cutoff_date = get_proper_project_dates(
-        year=date.today().year, month=date.today().month - months_back
+        year=cutoff_date_.year, month=cutoff_date_.month, day=cutoff_date_.day
     ).date()  # Convert to date
     recent_certs = []
 
@@ -706,11 +708,6 @@ def get_new_certifications_from_department(
                     if cert_date > cutoff_date:
                         recent_certs.append((person.name, cert))
 
-    # # Sort by date, newest first using get_proper_project_dates
-    # return sorted(
-    #     recent_certs, key=lambda x: get_proper_project_dates(x[1].date), reverse=True
-    # )
-    # Sort by date, newest first
     return sorted(
         recent_certs,
         key=lambda x: get_proper_project_dates(year=x[1].year, month=x[1].month).date()

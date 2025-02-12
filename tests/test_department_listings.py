@@ -1,10 +1,12 @@
 import json
+
 import pytest
 
 department = json.loads(open("tests/data/department.json").read())
 
 
 print(department[0])
+
 
 # write a dataclass for employee
 

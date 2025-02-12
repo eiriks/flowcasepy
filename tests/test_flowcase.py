@@ -101,7 +101,8 @@ def test_initiate_report_success(cv_partner):
         )
 
         # Call the method under test
-        report_id = cv_partner.initiate_report()
+
+        report_id = cv_partner.report_manager.initiate_report()
 
         # Assert the expected result
         assert report_id == "report123"
@@ -118,7 +119,7 @@ def test_initiate_report_failure(cv_partner):
 
         # Call the method under test and assert that it raises an exception
         with pytest.raises(Exception, match="Failed to initiate report: 400"):
-            cv_partner.initiate_report()
+            cv_partner.report_manager.initiate_report()
 
 
 def test_list_countries_success(cv_partner, mock_countries_response):

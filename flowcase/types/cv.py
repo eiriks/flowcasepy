@@ -37,17 +37,18 @@ class Blog(CVField):
 
 
 class Certification(CVField):
-    diverged_from_master: bool
-    external_unique_id: Any
-    long_description: TranslatedString
-    month: Optional[str] = None
-    month_expire: Any
-    name: TranslatedString
-    organiser: TranslatedString
-    origin_id: Any
-    year: Optional[str] = None
-    year_expire: Any
-    attachments: List
+    field_id: Optional[str] = Field(None, alias="_id")
+    diverged_from_master: bool = None
+    external_unique_id: Any = None
+    long_description: Optional[TranslatedString] = None
+    month: Optional[str | int] = None
+    month_expire: Optional[str | int] = None
+    name: Optional[TranslatedString] = None
+    organiser: Optional[TranslatedString] = None
+    origin_id: Any = None
+    year: Optional[str | int] = None
+    year_expire: Any = None
+    attachments: Optional[List] = None
 
 
 class Course(CVField):
@@ -241,15 +242,17 @@ class Image(BaseModel):
 
 
 class CVResponse(CVField):
+    field_id: Optional[str] = Field(..., alias="_id")
+    id: Optional[str] = None
     blogs: List[Blog] = []
     born_day: Optional[int] = None
     born_month: Optional[int] = None
     born_year: Optional[int] = None  # ??
-    bruker_id: str
+    bruker_id: str = None
     certifications: Optional[List[Certification]] = None
     courses: Optional[List[Course]] = None
     custom_tag_ids: Optional[List] = None
-    cv_roles: Optional[List[CvRole]]
+    cv_roles: Optional[List[CvRole]] = None
     default: Optional[bool] = None
     educations: Optional[List[Education]] = None
     honors_awards: Optional[List[HonorsAward]] = []
@@ -262,7 +265,7 @@ class CVResponse(CVField):
     locked_until: Optional[Any] = None
     name_multilang: Optional[Dict[str, Any]] = None
     nationality: Optional[TranslatedString] = None
-    navn: str
+    navn: Optional[str] = None
     owner_updated_at_significant: Optional[str] = None
     place_of_residence: Optional[TranslatedString] = None
     positions: List[Position] = []
@@ -271,7 +274,7 @@ class CVResponse(CVField):
     technologies: Optional[list[Technology]] = None
     telefon: Optional[str] = None
     tilbud_id: Optional[Any] = None
-    title: TranslatedString
+    title: Optional[TranslatedString] = None
     twitter: Optional[str] = None
     work_experiences: Optional[list[WorkExperience]] = None
     name: Optional[str] = None

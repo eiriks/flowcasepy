@@ -36,30 +36,30 @@ class Titles(BaseModel):
 class Employee(BaseModel):
     """The v4 version of the API"""
 
-    image: Image
+    field_id: Optional[str] = Field(None, alias="_id")
+    id: Optional[str] = None
+    image: Optional[Image] = None
     title: Optional[str] = None
-    titles: Titles
+    titles: Optional[Titles] = None
     telephone: Optional[str] = None
     email: Optional[str] = None
     navn: Optional[str] = None
     name: Optional[str] = None
-    name_multilang: Dict[str, Any]
-    is_external: bool
-    is_deactivated: bool
-    bruker_id: str
-    user_id: str
-    company_id: str
-    field_id: str = Field(..., alias="_id")
-    id: str
-    updated_at: str
-    updated_ago: str
+    name_multilang: Optional[Dict[str, Any]] = None
+    is_external: Optional[bool] = None
+    is_deactivated: Optional[bool] = None
+    bruker_id: Optional[str] = None
+    user_id: Optional[str] = None
+    company_id: Optional[str] = None
+    updated_at: Optional[str] = None
+    updated_ago: Optional[str] = None
     owner_updated_at: Optional[str] = None
-    default_word_template_id: str
-    default_ppt_template_id: Any
-    country_code: str
-    language_code: str
-    language_codes: List[str]
-    template_document_type: str
+    default_word_template_id: Optional[str] = None
+    default_ppt_template_id: Optional[Any] = None
+    country_code: Optional[str] = None
+    language_code: Optional[str] = None
+    language_codes: Optional[List[str]] = None
+    template_document_type: Optional[str] = None
 
 
 class EmployeeMeta(BaseModel):
