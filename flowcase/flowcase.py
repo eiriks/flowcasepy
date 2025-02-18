@@ -11,8 +11,10 @@ import pydantic
 import requests
 from pydantic import ValidationError
 
-# types
+# local
 from flowcase.reportmanager import ReportManager
+
+# types
 from flowcase.types.country import Countries, Office
 from flowcase.types.customer import Customers
 from flowcase.types.cv import CVResponse
@@ -48,15 +50,23 @@ class Flowcase:
 
     SEARCH_TYPES = Literal["free_text", "name", "technology_skill"]
 
-    def __init__(self, org: str, api_key: str, verbose: bool = False):
+    def __init__(
+        self,
+        org: str,
+        api_key: str,
+        verbose: bool = False,
+        report_manager: Optional[ReportManager] = None,
+    ):
         """Set up the Flowcase API client."""
         self._auth_header = {"Authorization": f'Token token="{api_key}"'}
         self.org = org
         """Name of the organization in Flowcase. It's the subdomain in the URL."""
         self.verbose = verbose
         """If True, print debug messages to stdout."""
-        self.report_manager = ReportManager(
-            REFERENCE_REPORTS_API_V4_URL.format(org=self.org), self._auth_header
+        self.report_manager = report_manager or ReportManager(
+            REFERENCE_REPORTS_API_V4_URL.format(org=self.org),
+            self._auth_header,
+            verbose,
         )
 
     def search(
@@ -64,20 +74,28 @@ class Flowcase:
         query_string: str,
         query_type: SEARCH_TYPES = "free_text",
         country_code: str = "no",
-        office_ids: Optional[list[str]] = [],
+        office_ids: Optional[list[str]] = None,
         offset: int = 0,
         size: int = 10,
     ) -> SearchResponseV4:
         """Search for users in Flowcase.
 
         Args:
-            office_ids: List of office IDs to search in.
-            offset: Offset for the search results.
-            size: Number of results to return.
-            query_type: str, one of: free_text, name, technology_skill.
-            query_value: Value to search for.
-            field: Field to search in.
-            tag: Tag to search for."""
+            query_string: The search query text
+            query_type: Type of search ('free_text', 'name', or 'technology_skill')
+            country_code: Two-letter country code (default: 'no')
+            office_ids: Optional list of office IDs to filter by
+            offset: Starting position in results (default: 0)
+            size: Number of results to return (default: 10)
+
+        Returns:
+            SearchResponseV4: The search results
+
+        Raises:
+            ValueError: If country_code is invalid
+
+
+        """
         log.debug(
             f"Retrieving users with query type: {query_type} and value: {query_string}"
         )

@@ -10,6 +10,17 @@ class TranslatedString(BaseModel):
     dk: Optional[str] = None
     fi: Optional[str] = None
 
+    def __str__(self):
+        # this surely is a problem if not using Norwegian
+        # but heck, it's probably just me using this
+        return self.no or self.int or self.se or self.dk or self.fi or "Unknown"
+
+    def __repr__(self):
+        return (
+            f"TranslatedString(no={self.no!r}, int={self.int!r}, se={self.se!r}, "
+            f"dk={self.dk!r}, fi={self.fi!r})"
+        )
+
 
 class CVField(BaseModel):
     field_id: str = Field(..., alias="_id")
@@ -49,6 +60,13 @@ class Certification(CVField):
     year: Optional[str | int] = None
     year_expire: Any = None
     attachments: Optional[List] = None
+
+    def __str__(self):
+        name = self.name if self.name else "Unknown"
+        organiser = self.organiser if self.organiser else "Unknown"
+        year = self.year if self.year else "Unknown"
+        month = self.month if self.month else "Unknown"
+        return f"🏆 Certification: {name} by {organiser}, Date: {month}/{year}"
 
 
 class Course(CVField):
