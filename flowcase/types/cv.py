@@ -88,12 +88,12 @@ class ProjectExperience(CVField):
 
 
 class CvRole(CVField):
-    diverged_from_master: bool
+    diverged_from_master: Optional[bool] = None
     name: TranslatedString
-    origin_id: Any
-    years_of_experience: int
-    years_of_experience_offset: int
-    project_experiences: List[ProjectExperience]
+    origin_id: Optional[Any] = None
+    years_of_experience: Optional[int] = None
+    years_of_experience_offset: Optional[int] = None
+    project_experiences: Optional[List[ProjectExperience]] = []
 
 
 class Education(CVField):

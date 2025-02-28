@@ -17,7 +17,7 @@ from flowcase.helpers import (
     remove_extra_whitespace,
     rename_common_variations_in_dev,
 )
-from flowcase.types.cv import Certification, CVResponse, TranslatedString
+from flowcase.types.cv import Certification, CVResponse, CvRole, TranslatedString
 from flowcase.types.department import Department
 from flowcase.types.employee import Employee
 from flowcase.types.search_result import SearchResults
@@ -88,11 +88,12 @@ def test_rename_common_variations_in_dev():
 
 
 def test_get_role_from_cv_roles():
-    cv_role = {"name": {"no": "Back End Developer."}}
+    cv_role = CvRole(_id="123", name=TranslatedString(no="Back End Developer."))
     assert get_role_from_cv_roles(cv_role) == "Backend Utvikler"
-    cv_role = {"name": {"no": "Enginer"}}
+    cv_role = CvRole(_id="123", name=TranslatedString(no="Enginer"))
     assert get_role_from_cv_roles(cv_role) == "Engineer"
-    cv_role = {"name": {"no": None}}
+
+    cv_role = CvRole(_id="123", name=TranslatedString(no=None))
     assert get_role_from_cv_roles(cv_role) is None
 
 

@@ -39,7 +39,8 @@ flowcasepy.egg-info
 /tests/**/*.pptx
 example_cv.json
 
-cvpartner/notebooks/
+notebooks/*
+!notebooks/test_search.ipynb
 cvpartner/notebooks/**/*.csv
 cvpartner/notebooks/kpi_results/
 flowcase/notebooks/

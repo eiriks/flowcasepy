@@ -11,11 +11,13 @@ from flowcase.types.cv import (
     Certification,
     Course,
     CVResponse,
+    CvRole,
     Education,
     HonorsAward,
     Position,
     Presentation,
     ProjectExperienceExpanded,
+    Technology,
     WorkExperience,
 )
 from flowcase.types.department import Department
@@ -611,8 +613,9 @@ def rename_common_variations_in_dev(string) -> str:
     return string
 
 
-def get_role_from_cv_roles(cv_role: dict, lang: str = "no") -> str | None:
-    tmp_role_string = cv_role.get("name", {}).get(lang)
+def get_role_from_cv_roles(cv_role: CvRole, lang: str = "no") -> str | None:
+    # get the name attribute from the name give then lang
+    tmp_role_string = getattr(cv_role.name, lang)
     if not tmp_role_string:
         return None
 
@@ -629,18 +632,20 @@ def get_role_from_cv_roles(cv_role: dict, lang: str = "no") -> str | None:
     return tmp_role_string
 
 
-def get_tags_from_cv(cv: dict, lang: str = "no") -> list[str]:
+def get_tags_from_cv(cv: CVResponse, lang: str = "no") -> list[str]:
     tags = []
-    technologies = cv.get("technologies")
+    technologies = cv.technologies
     if not technologies:
         return tags  # skip empty tags
 
     for technology in technologies:
+        technology: Technology
         # these come in groups
-        if technology.get("technology_skills"):
-            for group in technology.get("technology_skills"):
-                if group.get("tags").get(lang):
-                    tags.append(group.get("tags").get(lang))
+        if technology.technology_skills:
+            for group in technology.technology_skills:
+                tech_tag_name = getattr(group.tags, lang)
+                if tech_tag_name:
+                    tags.append(tech_tag_name)
             # print(json.dumps(group.get('tags').get(lang), indent=2))
     return tags
 

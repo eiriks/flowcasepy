@@ -6,9 +6,8 @@ from dotenv import load_dotenv
 
 from flowcase import Flowcase
 from flowcase.helpers import get_age, get_role_from_cv_roles
-from flowcase.types.cv import CVResponse
+from flowcase.types.cv import CVResponse, CvRole, TranslatedString
 from flowcase.types.employee import Employee
-from flowcase.types.cv import TranslatedString
 
 load_dotenv()
 
@@ -63,30 +62,33 @@ SOFTWARE_UTVIKLER = "Software Utvikler"
 
 
 def test_get_role_from_cv_roles_no_lang():
-    cv_role = {"name": {"no": "software developer."}}
+    # create a new CvRole ibject to test
+    cv_role = CvRole(_id="123", name=TranslatedString(no="software developer"))
+
     assert get_role_from_cv_roles(cv_role) == SOFTWARE_UTVIKLER
 
 
 def test_get_role_from_cv_roles_en_lang():
-    cv_role = {"name": {"en": "software developer"}}
-    assert get_role_from_cv_roles(cv_role, lang="en") == SOFTWARE_UTVIKLER
+    cv_role = CvRole(_id="123", name=TranslatedString(int="software developer"))
+    assert get_role_from_cv_roles(cv_role, lang="int") == SOFTWARE_UTVIKLER
 
 
 def test_get_role_from_cv_roles_with_dot():
-    cv_role = {"name": {"no": "software developer."}}
+    cv_role = CvRole(_id="123", name=TranslatedString(no="Software Developer"))
     assert get_role_from_cv_roles(cv_role) == SOFTWARE_UTVIKLER
 
 
 def test_get_role_from_cv_roles_with_slash():
-    cv_role = {"name": {"no": "Tech Lead/Utvikler"}}
+    cv_role = CvRole(_id="123", name=TranslatedString(no="Tech Lead/Utvikler"))
     assert get_role_from_cv_roles(cv_role) == "Tech Lead / Utvikler"
 
 
 def test_get_role_from_cv_roles_empty_is_none():
-    cv_role = {"name": {"no": ""}}
+    cv_role = CvRole(_id="123", name=TranslatedString(no=""))
     assert get_role_from_cv_roles(cv_role) is None
 
 
 def test_get_role_from_cv_roles_none():
-    cv_role = {"name": {}}
+    cv_role = {"_id": "meh", "name": {}}
+    cv_role = CvRole(**cv_role)
     assert get_role_from_cv_roles(cv_role) is None

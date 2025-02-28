@@ -249,7 +249,9 @@ class Flowcase:
         # the_dep = []
         the_dep = list(zip(users, cvs))
         try:
-            department: Department = Department.model_validate({"root": the_dep})
+            department: Department = Department.model_validate(
+                {"name": office_name, "root": the_dep}, from_attributes=True
+            )
             return department
         except pydantic.ValidationError:
             print(self.ERROR_MESSAGE_PARSE + office_name)

@@ -90,8 +90,9 @@ class SearchResponseV4(BaseModel):
             f"cvs_returned={len(self.cvs)} stk, {[n.cv.name for n in self.cvs]})"
         )
 
-    # def __repr__(self) -> str:
-    #     """Return an official string representation of the object."""
-    #     return (f"SearchResponseV4(current_page={self.current_page}, "
-    #             f"total_pages={self.total_pages}, total={self.total}, "
-    #             f"user_data=[...])")
+    def __repr__(self) -> str:
+        """Return an official string representation of the object."""
+        return (
+            f"SearchResponseV4(hits={self.total}, "
+            f"cvs_returned={len(self.cvs)} stk, {[n.cv.name for n in self.cvs]})"
+        )

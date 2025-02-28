@@ -61,6 +61,14 @@ class Employee(BaseModel):
     language_codes: Optional[List[str]] = None
     template_document_type: Optional[str] = None
 
+    def __str__(self) -> str:
+        """Return a human-readable string representation of the Employee."""
+        return f"{self.name} ({self.id})"
+
+    def __repr__(self) -> str:
+        """Return a detailed string representation for debugging."""
+        return f"Employee(id='{self.id}', " f"name='{self.name}'"
+
 
 class EmployeeMeta(BaseModel):
     cv: Employee

@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 from pydantic import BaseModel
 
@@ -10,6 +10,7 @@ from flowcase.types.employee import Employee
 class Department(BaseModel):
     """Department is a list of tuples of employees & CVResponses"""
 
+    name: Optional[str] = None
     root: List[Tuple[Employee, CVResponse]] = []
 
     def __len__(self):
