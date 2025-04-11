@@ -189,10 +189,10 @@ class Flowcase:
 
     @lru_cache(maxsize=1)
     def get_emploees_by_department(
-        self, office_name: str = "Data Engineering", size=100
+        self, office_name: str = "Data Engineering", size=100, country_code: str = "no"
     ) -> List[Employee]:
         # find office ID from name
-        offices = self.list_offices_from_country()
+        offices = self.list_offices_from_country(country_code=country_code)
         # filter down to only the match, if any
 
         office_id = [o.id for o in offices if o.name == office_name][0]
@@ -231,7 +231,7 @@ class Flowcase:
 
     @lru_cache(maxsize=1)
     def get_emploees_and_cvs_from_department(
-        self, office_name: str = "Data Engineering", size=100
+        self, office_name: str = "Data Engineering", size=100, country_code: str = "no"
     ) -> Department:
         """Get employees and their CVs from a department.
 
@@ -241,7 +241,9 @@ class Flowcase:
         # this fails by returning 100, it should be limited to size of department...
         # TODO: fix this
 
-        users: list[Employee] = self.get_emploees_by_department(office_name, size)
+        users: list[Employee] = self.get_emploees_by_department(
+            office_name, size, country_code
+        )
 
         cvs: list[CVResponse] = [
             self.get_user_cv(user.user_id, user.id) for user in users
