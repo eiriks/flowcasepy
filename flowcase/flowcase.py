@@ -27,7 +27,14 @@ from flowcase.types.search_result_v4 import SearchResponseV4
 USERS_API_V2_SEARCH_URL = (
     "https://{org}.flowcase.com/api/v2/users/search?deactivated=false&name={name}"
 )
+
+
+BASE_API_URL = "https://{org}.flowcase.com/api"
+# IMPORT_CV_URL = "https://{org}.flowcase.com/api/v1/users/import/csv/{config_name}?dry_run={dry_run_bool}"
 USERS_API_V4_SEARCH_URL = "https://{org}.flowcase.com/api/v4/search"
+
+# USERS_API = "https://{org}.flowcase.com/scim/v2/Users"  # "https://{org}.flowcase.com/api/v1/users"
+USERS_API = "https://{org}.flowcase.com/api/v1/users"
 CV_API_V3_URL_BASE = "https://{org}.flowcase.com/api/v3/cvs/{user_id}/{cv_id}"
 # COUNTRIES_API_V1_URL = "https://{org}.cvpartner.com/api/v1/countries"
 COUNTRIES_API_V1_URL = (
@@ -321,6 +328,63 @@ class Flowcase:
         """return country codes"""
         countries = self.list_countries()
         return [c.code for c in countries.root]
+
+    # I need these?
+
+    def get_custom_tag_categories(self):
+        url = f"{BASE_API_URL.format(org=self.org)}/v1/masterdata/custom_tags/custom_tag_category"
+        response = requests.get(url, headers=self._auth_header)
+        response.raise_for_status()
+        return response.json()
+
+    def get_custom_tags(self):
+        url = f"{BASE_API_URL.format(org=self.org)}/custom_tags"
+        response = requests.get(url, headers=self._auth_header)
+        response.raise_for_status()
+        return response.json()
+
+    def create_user(self, user_data: dict):
+        """Create a new user in Flowcase via API.
+        NB: This requies a API-key with admin rights. No not expect this to work with a normal user key.
+        ref: https://docs.flowcase.com/users#overview--create-a-new-user"""
+        logging.debug(f"Creating user {user_data} in API...")
+
+        url = USERS_API.format(org=self.org)
+        response = requests.post(url, json=user_data, headers=self._auth_header)
+
+        print(response)
+        print(response.text)
+
+        try:
+            response.raise_for_status()
+            print("✅ User successfully uploaded.")
+        except requests.exceptions.HTTPError as err:
+            print(f"❌ Create user failed: {err} You probably need admin rights?")
+            print(f"Response: {response.text}")
+            return None
+
+        # Safely return parsed JSON only if content is present
+        if response.text.strip():
+            try:
+                return response.json()
+            except ValueError:
+                print("⚠️ Response not in JSON format.")
+                return {"message": "No JSON returned", "text": response.text}
+        else:
+            return {"message": "No content returned (empty response body)"}
+
+    def delete_user(self, user_id: str):
+        """Delete a user.
+
+        NB: This requies a API-key with admin rights. No not expect this to work with a normal user key."""
+        logging.debug(f"Deleting user {user_id} from API...")
+        url = USERS_API.format(org=self.org)
+        print(f"Headers: {self._auth_header}")
+        print(f"DELETE {url}/{user_id}")
+        # DELETE https://<subdomain>.flowcase.com/api/v1/users/<user_id>
+        response = requests.delete(f"{url}/{user_id}", headers=self._auth_header)
+
+        print(response)
 
     # this method is not used by anything? remove?
     def get_customers_by_name(self, customer_name: str, size=10, offset=0) -> Customers:
