@@ -196,7 +196,10 @@ class Flowcase:
 
     @lru_cache(maxsize=1)
     def get_emploees_by_department(
-        self, office_name: str = "Data Engineering", size=100, country_code: str = "no"
+        self,
+        office_name: str = "NO Data Engineering",
+        size=100,
+        country_code: str = "no",
     ) -> List[Employee]:
         # find office ID from name
         offices = self.list_offices_from_country(country_code=country_code)

@@ -17,7 +17,7 @@ def flowcase():
 
 
 @pytest.fixture(scope="session")
-def employee_list(flowcase, office_name: str = "Data Engineering", size=100):
+def employee_list(flowcase, office_name: str = "NO Data Engineering", size=100):
     emploees: list[Employee] = flowcase.get_emploees_by_department(office_name, size)
     return emploees
 
