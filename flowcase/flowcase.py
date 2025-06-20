@@ -238,7 +238,10 @@ class Flowcase:
 
     @lru_cache(maxsize=1)
     def get_emploees_and_cvs_from_department(
-        self, office_name: str = "Data Engineering", size=100, country_code: str = "no"
+        self,
+        office_name: str = "NO Data Engineering",
+        size=100,
+        country_code: str = "no",
     ) -> Department:
         """Get employees and their CVs from a department.
 
@@ -285,6 +288,39 @@ class Flowcase:
 
         return cv
 
+    # @lru_cache(
+    #     maxsize=1
+    # )  # cache the result, Countries and offices (departments) should not update to often.
+    # def list_countries_with_offices(self):
+    #     url = COUNTRIES_API_V1_URL.format(org=self.org)
+
+    #     response = requests.get(url, headers=self._auth_header)
+    #     return response.json()
+    @lru_cache(maxsize=1)
+    def list_countries_with_offices(self):
+        url = COUNTRIES_API_V1_URL.format(org=self.org)
+
+        try:
+            response = requests.get(url, headers=self._auth_header)
+            response.raise_for_status()  # Raises HTTPError if not 200-399
+        except requests.exceptions.HTTPError as http_err:
+            raise RuntimeError(
+                f"HTTP error occurred when fetching countries: {http_err}"
+            ) from http_err
+        except requests.exceptions.RequestException as req_err:
+            raise RuntimeError(f"Request failed: {req_err}") from req_err
+
+        try:
+            data = response.json()
+            return data
+        except requests.exceptions.JSONDecodeError as json_err:
+            raise ValueError(
+                f"Failed to decode JSON from {url}. "
+                f"Status code: {response.status_code}, "
+                f"Content-Type: {response.headers.get('Content-Type')}, "
+                f"Response text: {response.text[:200]!r}"
+            ) from json_err
+
     @lru_cache(maxsize=1)  # cache the result, Countries class should be one result.
     def list_countries(self) -> Countries:
         """Lists the countries in the organization.
@@ -294,6 +330,7 @@ class Flowcase:
         """
         url = COUNTRIES_API_V1_URL.format(org=self.org)
         r = requests.get(url, headers=self._auth_header)
+
         try:
             data = r.json()
         except requests.exceptions.JSONDecodeError as e:
@@ -330,6 +367,7 @@ class Flowcase:
         return [c.code for c in countries.root]
 
     # I need these?
+    # are they broken?
 
     def get_custom_tag_categories(self):
         url = f"{BASE_API_URL.format(org=self.org)}/v1/masterdata/custom_tags/custom_tag_category"
@@ -345,6 +383,28 @@ class Flowcase:
 
     def create_user(self, user_data: dict):
         """Create a new user in Flowcase via API.
+        Example data:
+
+        {
+            "user": {
+                "country_id": "62bd38958dba4c000127048c",
+                "office_id": "659e6f81fe6e7e0034f6a704",
+                "email": "tomas.krag@noaignite.com",
+                "upn": "tomas.krag",
+                "role": "limited_access",
+                "name": "Tomas A. Krag",
+                "title": {
+                    "int": "Test User: CTO",
+                    "dk": "Test User: CTO",
+                },
+                "nationality": {
+                    "int": "Danish",
+                    "dk": "Danish",
+                },
+                "send_email": False,
+            }
+        }
+
         NB: This requies a API-key with admin rights. No not expect this to work with a normal user key.
         ref: https://docs.flowcase.com/users#overview--create-a-new-user"""
         logging.debug(f"Creating user {user_data} in API...")
@@ -385,6 +445,66 @@ class Flowcase:
         response = requests.delete(f"{url}/{user_id}", headers=self._auth_header)
 
         print(response)
+
+    # create project experience
+    def create_project_experience(self, user_id: str, cv_id: str, data: dict) -> dict:
+        """Create a new project experience for a user."""
+        url = (
+            BASE_API_URL.format(org=self.org)
+            + f"/v3/cvs/{user_id}/{cv_id}/project_experiences/"
+        )
+
+        response = requests.post(url, json=data, headers=self._auth_header)
+        response.raise_for_status()
+        return response.json()
+
+    def create_project_experience_role(
+        self, user_id: str, cv_id: str, project_experience_id: str, data: dict
+    ) -> dict:
+        """Example data:
+
+        role_payload = {
+            "role": {
+                "name": {"int": "Cloud Architect", "dk": "Cloud-arkitekt"},
+                "summary": {
+                  "dk": "Detaljer om hvilket problem, og hvilke ferdigheter og løsniger som ble valg.",
+                    "int": "Details about what problem was solved, and with what skills/technologies.",
+                },
+                "long_description": {
+                    "int": "Led the cloud migration strategy and execution.",
+                    "dk": "Ledede cloud-migreringsstrategien og implementeringen.",
+                },
+            }
+        }
+
+        NB: This requies a API-key with admin rights
+
+        """
+        #     url = f"https://{subdomain}.flowcase.com/api/v3/cvs/{user_id}/{cv_id}/project_experiences/{project_experience_id}/roles"
+        url = (
+            BASE_API_URL.format(org=self.org)
+            + f"/v3/cvs/{user_id}/{cv_id}/project_experiences/{project_experience_id}/roles"
+        )
+        response = requests.post(url, json=data, headers=self._auth_header)
+        response.raise_for_status()
+        return response.json()
+
+    # cant find docs for this
+    # def get_tags(self, user_id, cv_id):
+    #     """Get tags for a user."""
+    #     url = BASE_API_URL.format(org=self.org) + f"/v3/cvs/{user_id}/{cv_id}/tags/"
+    #     response = requests.get(url, headers=self._auth_header)
+    #     response.raise_for_status()
+    #     return response.json()
+
+    def get_skill_categories(self, user_id, cv_id):
+        # url = f"https://{org}.flowcase.com/api/v3/cvs/{user_id}/{cv_id}"
+        url = BASE_API_URL.format(org=self.org) + f"/v3/cvs/{user_id}/{cv_id}/"
+        print(url)
+        response = requests.get(url, headers=self._auth_header)
+        response.raise_for_status()
+        print(response)
+        return response.json()
 
     # this method is not used by anything? remove?
     def get_customers_by_name(self, customer_name: str, size=10, offset=0) -> Customers:

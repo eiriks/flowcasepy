@@ -6,8 +6,7 @@ from __future__ import annotations
 
 from typing import List, Optional
 
-from pydantic import BaseModel, Field
-from pydantic import RootModel
+from pydantic import BaseModel, Field, RootModel
 
 
 class Title(BaseModel):
@@ -19,26 +18,26 @@ class Title(BaseModel):
 
 
 class Thumb(BaseModel):
-    url: str
+    url: Optional[str]
 
 
 class FitThumb(BaseModel):
-    url: str
+    url: Optional[str] = None
 
 
 class Large(BaseModel):
-    url: str
+    url: Optional[str] = None
 
 
 class SmallThumb(BaseModel):
-    url: str
+    url: Optional[str] = None
 
 
 class Image(BaseModel):
-    url: str
+    url: Optional[str] = None
     thumb: Thumb
-    fit_thumb: FitThumb
-    large: Large
+    fit_thumb: Optional[FitThumb] = None
+    large: Optional[Large] = None
     small_thumb: SmallThumb
 
 
@@ -77,7 +76,7 @@ class SearchItem(BaseModel):
     selected_tag_ids: List
     override_language_code: Optional[str] = None
     default_cv_template_id: Optional[str] = None
-    image: Image
+    image: Optional[Image] = None
     name: str
     telephone: Optional[str] = None
     default_cv_id: str
